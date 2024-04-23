@@ -11,21 +11,28 @@ def initial_download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', s
         period : str
             Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
             Either Use period parameter or use start and end
+            Note (!): default is the date of the last closed data (T-1 day),
+            current day isn't downloaded by default
+
         interval : str
             Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
             Intraday data cannot extend last 60 days
         start: str
             Download start date string (YYYY-MM-DD)
-            Default is 99 years ago
-            E.g. for start="2020-01-01", the first data point will be on "2020-01-01"
-    
+        end: str
+            Download end date string (YYYY-MM-DD)
+
     :Returned DataFrame: 
         index: num
         values: 'Date' / YYYY-MM-DD, 'Open', 'High', 'Low' ,'Close', 'Volume'
     """
+    from datetime import date
+    
     if interval != '1d':
         raise Exception('Current version only handles interval of 1 day!')
     
+    today = str(date.today())
+
     stock = yf.Ticker(ticker)
     stock_df = stock.history(period=period, interval=interval, start=start, end=end)
     
@@ -33,6 +40,9 @@ def initial_download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', s
     stock_df = stock_df.rename_axis('Date').reset_index()
     stock_df = stock_df.drop(['Dividends', 'Stock Splits'], axis=1)
     
+    if stock_df.loc[len(stock_df)-1, 'Date'] == today:
+        stock_df.drop(len(stock_df)-1, axis='index', inplace=True)
+
     return stock_df
 
 def update_data_from_yahoofin():
@@ -142,5 +152,5 @@ if __name__ == '__main__':
     stock_df = initial_download_from_yahoofin(period='1y')
     stock_df = add_indicator(stock_df, indicator='all')
     print(f'{stock_df}\n')
-    print(stock_df.iloc[251,:])
+
 

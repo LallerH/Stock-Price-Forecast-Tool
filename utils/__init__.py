@@ -1,2 +1,3 @@
-from .initialdata_supply import initial_download_from_yahoofin, update_data_from_yahoofin, add_indicator
+from .data_supply import initial_download_from_yahoofin, update_data_from_yahoofin, add_indicator
 from .database_manager import get_data_from_mongodb, write_data_to_mongodb
+from .data_processer import AnalyserEngine

@@ -46,15 +46,42 @@ def get_data_from_mongodb(client = "mongodb://localhost:27017", database = 'Stoc
 
     return stock_df
 
+def get_candles_from_df(stock_df: pd.DataFrame, date=None, period=4) -> dict:
+    """
+    :Gets stock data from pd.DataFrame.
+    
+    :Parameters:
+        stock_df : pd.Dataframe (provided by get_data_from_mongodb or data_downloader module /with all indicators/)
+        date : str / YYYY-MM-DD (if None: last day of pd.DataFrame)
+        period : number of candles (must be 1 one candle more than the fingerprint period)
+    
+    :Returns: {dict{dict}} stock data from DataFrame of data_downloader module with all indicators
+        {keys -> keys of DataFrame, values -> {keys -> indexes of Dataframe, values: stock data}} 
+    """
+    if date == None:
+        idx = len(stock_df)
+        candles = stock_df.iloc[(idx-4):idx].to_dict('dict')
+        return candles
+
+    if date not in stock_df['Date'].values:
+        raise Exception(f'No data for date: {date}!')
+    
+    date_idx = stock_df[stock_df['Date'] == date].index.item()
+    
+    if date_idx < period:
+        raise Exception(f'Not enough anterior data for date: {date} for fingerprint period: {period}!')
+   
+    if date_idx < 49:
+        raise Exception(f'Not enough anterior data for date: {date} to calculate all fingerprint elements'\
+                        ' (min: 50 to calcluate SAM50!')
+    
+    candles = stock_df.iloc[(date_idx-3):(date_idx+1)].to_dict('dict')
+    return candles
+
 if __name__ == "__main__":
-    test_dict = {
-        '1' : [30_000, 'red', 'metal'],
-        '2' : [40_000, 'blue', 'plastic']
-        }
-
-    test_df = pd.DataFrame.from_dict(test_dict, orient='index', columns=['price','color','material'])
-    print(test_df)
-    write_data_to_mongodb(test_df)
-
     stock_df = get_data_from_mongodb()
-    print(f'\n{stock_df}')
+    print(f'\n{stock_df}')  
+    candles = get_candles_from_df(stock_df)
+    print(f'\n{candles}')
+
+   

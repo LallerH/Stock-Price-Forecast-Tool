@@ -9,7 +9,7 @@ class AnalyserEngine:
         - make projection based on historical data with the same fingerprint
     
     :Parameters: ()
-        candles : {dict{dict}} stock data from DataFrame of data_supply module with all indicators
+        candles : {dict{dict}} stock data from DataFrame of data_downloader module with all indicators
             {keys -> keys of DataFrame, values -> {keys -> indexes of Dataframe, values: stock data}} 
         period : int
             valid period: no longer than (len(candles)-1)
@@ -150,14 +150,14 @@ class AnalyserEngine:
         ...
 
 if __name__ == '__main__':
-    from database_manager import get_data_from_mongodb
+    from database_manager import get_data_from_mongodb, get_candles_from_df
     import pandas as pd
 
     stock_df = get_data_from_mongodb()
     # print(f'{stock_df}\n')
 
-    candles = stock_df.iloc[(len(stock_df)-4):(len(stock_df))].to_dict('dict') # !!! a function in data_supply module is required
-    print(f'Candles:\n{candles}')
+    candles = get_candles_from_df(stock_df)
+    print(f'Candles:\n{candles}\n')
 
     pattern = AnalyserEngine(candles)
     print(f'Fingerprint:\n{pattern.fingerprint()}')

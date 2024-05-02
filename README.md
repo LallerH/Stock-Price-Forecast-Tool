@@ -8,8 +8,11 @@ This is a portfolio project, the planned function of which is to find similar pa
 - forecasting future price (candlestick) with certain probability
 
 Version of Python libraries used in the development:
+(pip install -r requirements.txt)
 - matplotlib / 3.8.4
 - pandas / 2.2.1
 - pandas_ta / 0.3.14b0
 - pymongo / 4.6.3
 - yfinance/ 0.2.37
+
+Required database manager: MongoDB (mongodb://localhost:27017)

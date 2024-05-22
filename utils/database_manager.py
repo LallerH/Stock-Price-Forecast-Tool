@@ -60,7 +60,7 @@ def get_candles_from_df(stock_df: pd.DataFrame, date=None, period=4) -> dict:
     """
     if date == None:
         idx = len(stock_df)
-        candles = stock_df.iloc[(idx-4):idx].to_dict('dict')
+        candles = stock_df.iloc[(idx-period):idx].to_dict('dict')
         return candles
 
     if date not in stock_df['Date'].values:
@@ -75,7 +75,7 @@ def get_candles_from_df(stock_df: pd.DataFrame, date=None, period=4) -> dict:
         raise Exception(f'Not enough anterior data for date: {date} to calculate all fingerprint elements'\
                         ' (min: 50 to calcluate SAM50!')
     
-    candles = stock_df.iloc[(date_idx-3):(date_idx+1)].to_dict('dict')
+    candles = stock_df.iloc[(date_idx-(period-1)):(date_idx+1)].to_dict('dict')
     return candles
 
 if __name__ == "__main__":

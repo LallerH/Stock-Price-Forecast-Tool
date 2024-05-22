@@ -1,7 +1,11 @@
+import pandas as pd
+
+if __name__ != '__main__':
+    from .database_manager import get_candles_from_df
 
 class AnalyserEngine:
 
-    def __init__(self, candles: dict, period=3, tolerance=10):
+    def __init__(self, candles: dict, period=3):
         '''
     :Processing of data:
         - generate fingerprint for data of a certain date
@@ -13,8 +17,6 @@ class AnalyserEngine:
             {keys -> keys of DataFrame, values -> {keys -> indexes of Dataframe, values: stock data}} 
         period : int
             valid period: no longer than (len(candles)-1)
-        tolerance: int
-            percentage of tolerance range used in the search for similar historical data
         '''
         if len(candles) < period:
             raise Exception('Argument mismatch: number of days in CANDLES list /length/ must be '\
@@ -32,7 +34,8 @@ class AnalyserEngine:
         self.candles = candles
         self.indexes = indexes
         self.period = period
-        self.tolerance = tolerance
+        self.date = candles['Date'][indexes[-1]]
+        self.fingerprint = self.fingerprint()
 
     def fingerprint(self)-> dict:
         '''
@@ -51,7 +54,7 @@ class AnalyserEngine:
                 'Lowchg' : {keys, values -> as of previuos / int}
             -> %change of OPEN data (T / T-1)
                 'Openchg' : {keys, values -> as of previuos / int}
-            -> %inraday change (CLOSE / OPEN)
+            -> %intraday change (CLOSE / OPEN)
                 'Body' : {keys, values -> as of previuos / int}
             -> %change of HIGH data (T / T-1)
                 'Highchg' : {keys, values -> as of previuos / int}
@@ -99,18 +102,17 @@ class AnalyserEngine:
             sma50chg = self.candles['SMA50'][value] / self.candles['SMA50'][value-1]
             
             if self.candles['Close'][value] > self.candles['Open'][value]:
-                color = 'green'
+                result['Color'].update({value : 'green'})
             elif self.candles['Close'][value] < self.candles['Open'][value]:
-                color = 'red'
+                result['Color'].update({value : 'red'})
             else:
-                color = 'neutral'
+                result['Color'].update({value : 'neutral'})
           
             result['Date'].update({value : self.candles['Date'][value]})
             result['Lowchg'].update({value : lowchg})
             result['Openchg'].update({value : openchg})
             result['Body'].update({value : body})
             result['Highchg'].update({value : highchg})
-            result['Color'].update({value : color})
             result['RSIavgchg'].update({value : rsiavgchg})
             result['MACDhistchg'].update({value : macdhistchg})
             result['SMA20chg'].update({value : sma20chg})
@@ -139,26 +141,215 @@ class AnalyserEngine:
 
         return result
 
-    def matched_periods(self)-> list:
+    def generate_comparison_dict(self, benchmark: "AnalyserEngine", tolerance=20)-> dict:
         '''
+        :Compares the self.fingerprint dict with a benchmark fingerprint dict
+        
+        :Arguments:
+            benchmark: instance of AnalyserEngine class on benchmark data/date
+            tolerance: (int) percentage of tolerance range used in the search for similar historical data
+        
+        :Returns : dict
+            -> with the same keys as of self.fingerprint dict
+            -> values: TRUE if the benchmark is in the range of self.fingerprint value +/- tolerance range
+                or self.fingerprint value == benchmark.fingerprint value in case of state keys (e.g.: color of candle)       
         '''
-        ...
-    
-    def projection(self)-> dict:
+        tolerance = tolerance / 100
+        result = {'Date' : {},
+                  'Lowchg' : {},
+                  'Openchg' : {},
+                  'Body' : {},
+                  'Highchg' : {},
+                  'Color' : {},
+                  'RSIavgchg' : {},
+                  'RSIstate' : '',
+                  'MACDhistchg' : {},
+                  'MACDrange' : '',
+                  'SMA20chg' : {},
+                  'SMA50chg' : {},
+                  'SMA20_50relation' : ''
+                  }
+        
+        list_of_numeric_keys = ('Lowchg', 'Openchg', 'Body', 'Highchg',
+                                'RSIavgchg', 'MACDhistchg')
+        list_of_numeric_sensible_keys = ('SMA20chg', 'SMA50chg')
+        
+        for idx, value in list(enumerate(self.indexes))[1:]:
+            result['Date'].update({(benchmark.indexes[idx]) : benchmark.candles['Date'][(benchmark.indexes[idx])]})
+            
+            if self.fingerprint['Color'][value] == benchmark.fingerprint['Color'][(benchmark.indexes[idx])]:
+                result['Color'].update({(benchmark.indexes[idx]) : True})
+            else:
+                result['Color'].update({(benchmark.indexes[idx]) : False})
+            
+            if self.fingerprint['Color'][value] == 'neutral' or benchmark.fingerprint['Color'][(benchmark.indexes[idx])] == 'neutral':
+                result['Color'].update({(benchmark.indexes[idx]) : True})
+
+            for key in list_of_numeric_keys:
+                benchmark_value = benchmark.fingerprint[key][(benchmark.indexes[idx])]
+                self_value = self.fingerprint[key][value]
+                
+                if benchmark_value > 1.005:
+                    if (self_value < (benchmark_value + (benchmark_value - 1) * tolerance)) and\
+                       (self_value > (benchmark_value - (benchmark_value - 1) * tolerance)):
+                        result[key].update({(benchmark.indexes[idx]) : True})
+                    else:
+                        result[key].update({(benchmark.indexes[idx]) : False})
+                elif benchmark.fingerprint[key][(benchmark.indexes[idx])] >= 0.995:
+                    if (self_value < (benchmark_value + tolerance/200)) and\
+                       (self_value > (benchmark_value - tolerance/200)):
+                        result[key].update({(benchmark.indexes[idx]) : True})
+                    else:
+                        result[key].update({(benchmark.indexes[idx]) : False})
+                else:
+                    if (self_value < (benchmark_value + (1 - benchmark_value) * tolerance)) and\
+                       (self_value > (benchmark_value - (1 - benchmark_value) * tolerance)):
+                        result[key].update({(benchmark.indexes[idx]) : True})
+                    else:
+                        result[key].update({(benchmark.indexes[idx]) : False})
+
+            for key in list_of_numeric_sensible_keys:
+                benchmark_value = benchmark.fingerprint[key][(benchmark.indexes[idx])]
+                self_value = self.fingerprint[key][value]
+                
+                if (self_value < (benchmark_value + tolerance/2000)) and (self_value > (benchmark_value - tolerance/2000)):
+                    result[key].update({(benchmark.indexes[idx]) : True})
+                else:
+                    result[key].update({(benchmark.indexes[idx]) : False})
+                if (benchmark_value > 1 and self_value < 1) or (benchmark_value < 1 and self_value > 1):
+                    result[key].update({(benchmark.indexes[idx]) : False})
+
+        if self.fingerprint['RSIstate'] == benchmark.fingerprint['RSIstate']:
+            result.update({'RSIstate' : True})
+        else:
+            result.update({'RSIstate' : False})
+
+        if self.fingerprint['MACDrange'] == benchmark.fingerprint['MACDrange']:
+            result.update({'MACDrange' : True})
+        else:
+            result.update({'MACDrange' : False})
+        
+        if self.fingerprint['SMA20_50relation'] == benchmark.fingerprint['SMA20_50relation']:
+            result.update({'SMA20_50relation' : True})
+        else:
+            result.update({'SMA20_50relation' : False})
+
+        return result
+
+    @staticmethod
+    def check_similarity(comparison_dict: dict, indexes: list):
         '''
+        :Evaluate comparison dict
+        
+        :Arguments:
+            comparison dict of self.generate_comparison_dict method
+            indexes: benchmark AnalyserEngine instance .indexes (needed to identify the date of similarty check)
+        
+        :Returns: str, bool
+            -> date YYYY-MM-DD / 
+            -> TRUE in case of similarity (False in else case)
+        
+        Note that this method is still in testing phase, the key indicators is needed to be identified
+        1) to get convenient similar (quality) data 
+        2) to get enough data (quantity) for the further statistical methods
         '''
-        ...
+        parameters = {'Lowchg' : bool,
+                    #   'Openchg' : bool,
+                    #   'Body' : bool,
+                      'Highchg' : bool,
+                    #   'Color' : bool,
+                      'RSIavgchg' : bool,
+                      'RSIstate' : bool,
+                    #   'MACDhistchg' : bool,
+                      'MACDrange' : bool,
+                    #   'SMA20chg' : bool,
+                    #   'SMA50chg' : bool,
+                    #   'SMA20_50relation' : bool
+                  }
+        list_of_multiplevalue_keys = ('Lowchg', 'Highchg', 'RSIavgchg')#', Openchg', 'Body')
+                                      #,'MACDhistchg' ,'SMA20chg', 'SMA50chg')
+        list_of_singlevalue_keys = ('RSIstate', 'MACDrange')#, 'SMA20_50relation')
+        list_of_strict_keys = ()#'Color')
+
+        for key in comparison_dict:
+            if key in list_of_singlevalue_keys:
+                parameters.update({key: comparison_dict[key]})
+            elif key in list_of_strict_keys:
+                parameters.update({key: True})
+                for index in comparison_dict[key]:
+                    if comparison_dict[key][index] == False:
+                        parameters.update({key: False})
+            elif key in list_of_multiplevalue_keys:
+                parameters.update({key: True})
+                for index in comparison_dict[key]:
+                    if comparison_dict[key][index] == False:
+                        parameters.update({key: False})
+        
+        result = True
+        for key in parameters:
+            if parameters[key] == False:
+                result = False
+
+        return comparison_dict['Date'][indexes[len(indexes)-1]], result
+
+    @staticmethod
+    def get_next_day_chg(stock_df: pd.DataFrame, dates_of_matching_benchmark: dict)-> dict:
+        '''
+        :Calculates change of open/close price on following day of matching(similar) benchmark data
+        
+        :Arguments:
+            stock_df: DataFrame of stock data (provided by database_manager package)
+            dict object: containing matching(similar) benchmark dates: {{'YYYY-MM-DD': bool}, {...}}
+        
+        :Returns: {{'Lowchg':[float,float,...]},{'Highchg':[float,float,...]}}
+        '''
+               
+        lowchg_list = []
+        highchg_list = []
+        
+        for date in dates_of_matching_benchmark:
+            next_date_index = stock_df.index.get_loc(stock_df.loc[((stock_df.index[stock_df['Date'] == date])+1)].index[0])
+            next_date = stock_df.loc[next_date_index]['Date']
+            
+            candles_benchmark = get_candles_from_df(stock_df, next_date, period=2)
+            pattern_benchmark = AnalyserEngine(candles_benchmark, period=1)
+
+            for key in pattern_benchmark.fingerprint['Lowchg']:
+                lowchg_list.append(pattern_benchmark.fingerprint['Lowchg'][key])
+            
+            for key in pattern_benchmark.fingerprint['Highchg']:
+                highchg_list.append(pattern_benchmark.fingerprint['Highchg'][key])
+        
+        return {'Lowchg': lowchg_list, 'Highchg': highchg_list}
 
 if __name__ == '__main__':
     from database_manager import get_data_from_mongodb, get_candles_from_df
-    import pandas as pd
 
     stock_df = get_data_from_mongodb()
-    # print(f'{stock_df}\n')
+    print(f'{stock_df}\n')
 
-    candles = get_candles_from_df(stock_df)
+    candles = get_candles_from_df(stock_df, date='2024-05-09', period=4)
     print(f'Candles:\n{candles}\n')
 
-    pattern = AnalyserEngine(candles)
-    print(f'Fingerprint:\n{pattern.fingerprint()}')
-    
+    pattern = AnalyserEngine(candles, period=3)
+    print(f'Fingerprint:\n{pattern.fingerprint}\n')
+
+    dates_of_matching_benchmark = {}
+    for index, row in stock_df.loc[22000:].iterrows():
+        if pattern.date != row['Date']:
+
+            benchmark_date = row['Date']
+            candles_benchmark = get_candles_from_df(stock_df, benchmark_date, period=4)
+            pattern_benchmark = AnalyserEngine(candles_benchmark, period=3)
+
+            comparison_data = pattern.generate_comparison_dict(pattern_benchmark, tolerance=70)
+
+            result = AnalyserEngine.check_similarity(comparison_data, pattern_benchmark.indexes)
+            if result[1]:
+                dates_of_matching_benchmark.update({result})
+     
+    print(f'{dates_of_matching_benchmark}\n')
+
+    next_day_chg_dict = AnalyserEngine.get_next_day_chg(stock_df, dates_of_matching_benchmark)
+
+    print(next_day_chg_dict)

@@ -1,3 +1,3 @@
 from .data_downloader import initial_download_from_yahoofin, update_data_from_yahoofin, add_indicator
-from .database_manager import get_data_from_mongodb, write_data_to_mongodb
+from .database_manager import get_data_from_mongodb, write_data_to_mongodb, get_candles_from_df
 from .data_analyser_engine import AnalyserEngine

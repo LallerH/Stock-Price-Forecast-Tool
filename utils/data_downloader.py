@@ -2,9 +2,9 @@ import yfinance as yf
 import pandas as pd
 import pandas_ta as ta
 
-def initial_download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', start=None, end=None) -> pd.DataFrame:
+def download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', start=None, end=None) -> pd.DataFrame:
     """
-    :Gets stock histroical data with yfinance library. (Note: this version handles only one Ticker and the interval of 1 day.)
+    :Gets stock histroical data with yfinance library. (Note: this version handles only ^GSPC ticker and the interval of 1 day.)
     
     :Parameters:
         ticker : str (as of Yahoo Finance)
@@ -34,7 +34,10 @@ def initial_download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', s
     today = str(date.today())
 
     stock = yf.Ticker(ticker)
-    stock_df = stock.history(period=period, interval=interval, start=start, end=end)
+    if start == None:
+        stock_df = stock.history(period=period, interval=interval)
+    else:
+        stock_df = stock.history(interval=interval, start=start, end=today)
     
     stock_df.index = stock_df.index.strftime('%Y-%m-%d')
     stock_df = stock_df.rename_axis('Date').reset_index()
@@ -44,9 +47,6 @@ def initial_download_from_yahoofin(ticker='^GSPC', period='1y', interval='1d', s
         stock_df.drop(len(stock_df)-1, axis='index', inplace=True)
 
     return stock_df
-
-def update_data_from_yahoofin():
-    ...
 
 def add_indicator(stock_df: pd.DataFrame, indicator='all') -> pd.DataFrame:
     """
@@ -149,7 +149,7 @@ def add_indicator(stock_df: pd.DataFrame, indicator='all') -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    stock_df = initial_download_from_yahoofin(period='1y')
+    stock_df = download_from_yahoofin(period='1y')
     stock_df = add_indicator(stock_df, indicator='all')
     print(f'{stock_df}\n')
 

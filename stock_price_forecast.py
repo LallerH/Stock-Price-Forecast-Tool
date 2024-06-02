@@ -6,6 +6,8 @@ from utils import download_from_yahoofin,\
                   get_candles_from_df,\
                   AnalyserEngine,\
                   show_histogram,\
+                  show_candle_chart,\
+                  show_all_charts,\
                   check_data_in_mongodb
 
 if __name__ == '__main__':
@@ -28,9 +30,9 @@ if __name__ == '__main__':
     print(f'{stock_df}\n')
 
     # ------------- MAIN drivers -------------
-    date = '2024-05-09'
+    date = '2024-05-30'
     compared_period = 2
-    tolerance = 65
+    tolerance = 50
     # ----------------------------------------
 
     candles = get_candles_from_df(stock_df, date=date, period=compared_period+1)
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     pattern = AnalyserEngine(candles)
     print(f'Fingerprint:\n{pattern.fingerprint}\n')
 
-    print('Downloading and preparing data could take several minutes!\n')
+    print('Comparing data, may take several minutes!\n')
 
     dates_of_matching_benchmark = {}
     for index, row in stock_df.loc[13605:].iterrows(): # first correct data of GSPC is on index 13605 '1982-04-20'
@@ -57,8 +59,11 @@ if __name__ == '__main__':
      
     print(f'{dates_of_matching_benchmark}\n')
 
-    next_day_chg_dict = AnalyserEngine.get_next_day_chg(stock_df, dates_of_matching_benchmark)
-
-    print(next_day_chg_dict)
-
-    show_histogram(date, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
+    pattern.get_next_day_chg(stock_df, dates_of_matching_benchmark)
+    candles_for_chart = get_candles_from_df(stock_df, date='2024-05-31', period=compared_period+2)
+    median_lowchg = pattern.stats('median_Lowchg')
+    median_highchg = pattern.stats('median_Highchg')
+    
+    show_all_charts(candles_for_chart, date, Lowchg=pattern.next_day_chg_dict['Lowchg'],
+                    Highchg=pattern.next_day_chg_dict['Highchg'],
+                    projection={'Lowchg': median_lowchg, 'Highchg': median_highchg})

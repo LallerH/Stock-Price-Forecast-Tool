@@ -36,6 +36,7 @@ class AnalyserEngine:
         self.period = period
         self.date = candles['Date'][indexes[-1]]
         self.fingerprint = self.fingerprint()
+        self.next_day_chg_dict = {}
 
     def fingerprint(self)-> dict:
         '''
@@ -236,6 +237,19 @@ class AnalyserEngine:
 
         return result
 
+    def stats(self, indicator: str) -> int:
+        '''
+        '''
+        import matplotlib.cbook as cbk
+        import numpy as np
+        # ha üres a self.next_day_chg_dict hibakezelés
+        
+        if indicator == 'median_Lowchg':
+            return cbk.boxplot_stats(self.next_day_chg_dict['Lowchg'])[0]['med']
+        
+        if indicator == 'median_Highchg':
+            return cbk.boxplot_stats(self.next_day_chg_dict['Highchg'])[0]['med']
+
     @staticmethod
     def check_similarity(comparison_dict: dict, indexes: list):
         '''
@@ -292,8 +306,7 @@ class AnalyserEngine:
 
         return comparison_dict['Date'][indexes[len(indexes)-1]], result
 
-    @staticmethod
-    def get_next_day_chg(stock_df: pd.DataFrame, dates_of_matching_benchmark: dict)-> dict:
+    def get_next_day_chg(self, stock_df: pd.DataFrame, dates_of_matching_benchmark: dict):
         '''
         :Calculates change of open/close price on following day of matching(similar) benchmark data
         
@@ -301,7 +314,7 @@ class AnalyserEngine:
             stock_df: DataFrame of stock data (provided by database_manager package)
             dict object: containing matching(similar) benchmark dates: {{'YYYY-MM-DD': bool}, {...}}
         
-        :Returns: {{'Lowchg':[float,float,...]},{'Highchg':[float,float,...]}}
+        :sets class variable next_day_chg_dict to {{'Lowchg':[float,float,...]},{'Highchg':[float,float,...]}}
         '''
                
         lowchg_list = []
@@ -320,7 +333,7 @@ class AnalyserEngine:
             for key in pattern_benchmark.fingerprint['Highchg']:
                 highchg_list.append(pattern_benchmark.fingerprint['Highchg'][key])
         
-        return {'Lowchg': lowchg_list, 'Highchg': highchg_list}
+        self.next_day_chg_dict = {'Lowchg': lowchg_list, 'Highchg': highchg_list}
 
 if __name__ == '__main__':
     from database_manager import get_data_from_mongodb, get_candles_from_df
@@ -328,28 +341,34 @@ if __name__ == '__main__':
     stock_df = get_data_from_mongodb()
     print(f'{stock_df}\n')
 
-    candles = get_candles_from_df(stock_df, date='2024-05-09', period=4)
+    candles = get_candles_from_df(stock_df, date='2024-05-30', period=3)
     print(f'Candles:\n{candles}\n')
 
     pattern = AnalyserEngine(candles, period=3)
     print(f'Fingerprint:\n{pattern.fingerprint}\n')
 
-    dates_of_matching_benchmark = {}
-    for index, row in stock_df.loc[22000:].iterrows():
-        if pattern.date != row['Date']:
+    # dates_of_matching_benchmark = {}
+    # for index, row in stock_df.loc[22000:].iterrows():
+    #     if pattern.date != row['Date']:
 
-            benchmark_date = row['Date']
-            candles_benchmark = get_candles_from_df(stock_df, benchmark_date, period=4)
-            pattern_benchmark = AnalyserEngine(candles_benchmark, period=3)
+    #         benchmark_date = row['Date']
+    #         candles_benchmark = get_candles_from_df(stock_df, benchmark_date, period=3)
+    #         pattern_benchmark = AnalyserEngine(candles_benchmark, period=2)
 
-            comparison_data = pattern.generate_comparison_dict(pattern_benchmark, tolerance=70)
+    #         comparison_data = pattern.generate_comparison_dict(pattern_benchmark, tolerance=50)
 
-            result = AnalyserEngine.check_similarity(comparison_data, pattern_benchmark.indexes)
-            if result[1]:
-                dates_of_matching_benchmark.update({result})
+    #         result = AnalyserEngine.check_similarity(comparison_data, pattern_benchmark.indexes)
+    #         if result[1]:
+    #             dates_of_matching_benchmark.update({result})
      
-    print(f'{dates_of_matching_benchmark}\n')
+    # print(f'{dates_of_matching_benchmark}\n')
 
-    next_day_chg_dict = AnalyserEngine.get_next_day_chg(stock_df, dates_of_matching_benchmark)
+    # pattern.get_next_day_chg(stock_df, dates_of_matching_benchmark)
 
-    print(next_day_chg_dict)
+    pattern.next_day_chg_dict = {'Lowchg': [1.002761470327116, 1.000041061493693, 1.0372261654256407, 0.9932368456496866, 0.9935887890282025], 'Highchg': [1.0020899694486982, 0.9929869651965559, 1.0239271700303225, 0.9910996187996407, 0.9951449353133529]}
+
+    print(pattern.next_day_chg_dict)
+
+    print(pattern.stats('median_Lowchg'))
+    print(pattern.stats('median_Highchg'))
+

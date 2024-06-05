@@ -239,10 +239,14 @@ class AnalyserEngine:
 
     def stats(self, indicator: str) -> int:
         '''
+        :Returns the requested indicator
+        
+        Arguments: str ->
+            'median_Lowchg',
+            'median_Highchg'
         '''
         import matplotlib.cbook as cbk
         import numpy as np
-        # ha üres a self.next_day_chg_dict hibakezelés
         
         if indicator == 'median_Lowchg':
             return cbk.boxplot_stats(self.next_day_chg_dict['Lowchg'])[0]['med']
@@ -285,6 +289,8 @@ class AnalyserEngine:
         list_of_singlevalue_keys = ('RSIstate', 'MACDrange')#, 'SMA20_50relation')
         list_of_strict_keys = ()#'Color')
 
+        # Still in testing phase: the combination of indicators has to be fine-tuned in order to get the best projection!
+
         for key in comparison_dict:
             if key in list_of_singlevalue_keys:
                 parameters.update({key: comparison_dict[key]})
@@ -306,7 +312,7 @@ class AnalyserEngine:
 
         return comparison_dict['Date'][indexes[len(indexes)-1]], result
 
-    def get_next_day_chg(self, stock_df: pd.DataFrame, dates_of_matching_benchmark: dict):
+    def set_next_day_chg(self, stock_df: pd.DataFrame, dates_of_matching_benchmark: dict):
         '''
         :Calculates change of open/close price on following day of matching(similar) benchmark data
         
@@ -363,7 +369,7 @@ if __name__ == '__main__':
      
     # print(f'{dates_of_matching_benchmark}\n')
 
-    # pattern.get_next_day_chg(stock_df, dates_of_matching_benchmark)
+    # pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
 
     pattern.next_day_chg_dict = {'Lowchg': [1.002761470327116, 1.000041061493693, 1.0372261654256407, 0.9932368456496866, 0.9935887890282025], 'Highchg': [1.0020899694486982, 0.9929869651965559, 1.0239271700303225, 0.9910996187996407, 0.9951449353133529]}
 

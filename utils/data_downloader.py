@@ -147,7 +147,6 @@ def add_indicator(stock_df: pd.DataFrame, indicator='all') -> pd.DataFrame:
 
     return stock_df
 
-
 if __name__ == '__main__':
     stock_df = download_from_yahoofin(period='1y')
     stock_df = add_indicator(stock_df, indicator='all')

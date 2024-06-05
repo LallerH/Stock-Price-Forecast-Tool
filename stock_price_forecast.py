@@ -1,9 +1,11 @@
 import pandas as pd
+import sys
 from utils import download_from_yahoofin,\
                   add_indicator,\
                   write_data_to_mongodb,\
                   get_data_from_mongodb,\
                   get_candles_from_df,\
+                  get_index_from_df,\
                   AnalyserEngine,\
                   show_histogram,\
                   show_candle_chart,\
@@ -11,40 +13,61 @@ from utils import download_from_yahoofin,\
                   check_data_in_mongodb
 
 if __name__ == '__main__':
-       
-    db_exists = check_data_in_mongodb()
+
+    # ------------- MAIN DRIVERS -------------
+    ticker ='^GSPC'
+    # -> see ticker names on Yahoo Finance; tickers e.g.:
+    # -> S&P500: ^GSPC
+    # -> DAX: ^GDAXI
+    # -> NASDAQ: ^IXIC
+    # -> OTP: OTP.BD
+    ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
+    date = '2024-05-13' # of last fact data; the projection will be prepared for the following day
+    compared_period = 3
+    tolerance = 75
+    # -> proposed set: period = 2-3 , tolerance = 50-100
+    # -> lower period and higher tolerance more hit
+    chartwithfact = True
+    # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
+    # -> only available if date is not the last available data (not available for projections based on last day data)
+    first_correct_data_of_yahoo = {'^GSPC': 13605, '^GDAXI': 1491, '^IXIC': 3459}    
+    # -> yahoo database is not perfect; no suitable data is available in database before:
+    # -> ^GSPC: 1982-04-20 (index: 13605) 
+    # -> ^GDAXI: 1993-12-15 (index: 1491)
+    # -> ^IXIC: 1984-10-12 (index: 3459)
+    # ----------------------------------------
+    
+    if ticker not in first_correct_data_of_yahoo:
+        first_correct_data_of_yahoo.update({ticker: 0})
+    if ticker not in ticker_name:
+        ticker_name.update({ticker: ticker})
+
+    db_exists = check_data_in_mongodb(coll=ticker)
     if db_exists[0] == False:
-        stock_df = download_from_yahoofin(period='max')
+        stock_df = download_from_yahoofin(ticker=ticker, period='max')
         stock_df = add_indicator(stock_df, indicator='all')
-        write_data_to_mongodb(stock_df)
+        write_data_to_mongodb(stock_df, coll=ticker)
         print(f'{stock_df}\n')
     else:
-        stock_df_expasion = download_from_yahoofin(start=db_exists[1])
-        stock_df = get_data_from_mongodb(range='last')
+        stock_df_expasion = download_from_yahoofin(ticker=ticker, start=db_exists[1])
+        stock_df = get_data_from_mongodb(coll= ticker, range='last')
         stock_df = pd.concat([stock_df, stock_df_expasion], axis=0, ignore_index=True)
         stock_df = add_indicator(stock_df, indicator='all')
-        write_data_to_mongodb(stock_df, replace=False)
-        print(f'{stock_df}\n')
+        write_data_to_mongodb(stock_df, coll=ticker, replace=False)
 
-    stock_df = get_data_from_mongodb()
+    stock_df = get_data_from_mongodb(coll=ticker)
     print(f'{stock_df}\n')
-
-    # ------------- MAIN drivers -------------
-    date = '2024-05-30'
-    compared_period = 2
-    tolerance = 50
-    # ----------------------------------------
 
     candles = get_candles_from_df(stock_df, date=date, period=compared_period+1)
     print(f'Candles:\n{candles}\n')
 
-    pattern = AnalyserEngine(candles)
+    pattern = AnalyserEngine(candles, period=compared_period)
     print(f'Fingerprint:\n{pattern.fingerprint}\n')
 
     print('Comparing data, may take several minutes!\n')
 
     dates_of_matching_benchmark = {}
-    for index, row in stock_df.loc[13605:].iterrows(): # first correct data of GSPC is on index 13605 '1982-04-20'
+    for index, row in stock_df.loc[first_correct_data_of_yahoo[ticker]+compared_period+50:].iterrows():
         if pattern.date != row['Date']:
 
             benchmark_date = row['Date']
@@ -58,12 +81,26 @@ if __name__ == '__main__':
                 dates_of_matching_benchmark.update({result})
      
     print(f'{dates_of_matching_benchmark}\n')
+    if dates_of_matching_benchmark == {}:
+        print('No hit with the drivers set!\n')
+        sys.exit()
 
-    pattern.get_next_day_chg(stock_df, dates_of_matching_benchmark)
-    candles_for_chart = get_candles_from_df(stock_df, date='2024-05-31', period=compared_period+2)
+    pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
+    
+    if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, date):
+        last_day = stock_df['Date'][get_index_from_df(stock_df, date)+1]
+    elif chartwithfact and not stock_df.tail(1).index[0] > get_index_from_df(stock_df, date):
+        last_day = date
+        chartwithfact = False
+        print(f'Fact data for the following date of {date} is not available!\n')
+    else:
+        last_day = date
+    
+    candles_for_chart = get_candles_from_df(stock_df, date=last_day, period=compared_period+1)
     median_lowchg = pattern.stats('median_Lowchg')
     median_highchg = pattern.stats('median_Highchg')
     
-    show_all_charts(candles_for_chart, date, Lowchg=pattern.next_day_chg_dict['Lowchg'],
+    show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
                     Highchg=pattern.next_day_chg_dict['Highchg'],
-                    projection={'Lowchg': median_lowchg, 'Highchg': median_highchg})
+                    projection={'Lowchg': median_lowchg, 'Highchg': median_highchg}, chartwithfact=chartwithfact)
+    

@@ -16,10 +16,12 @@ def check_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stoc
     mongodb_client = MongoClient(f'{client}')
     if database not in mongodb_client.list_database_names():
         return False, False
-
+    
     mongodb_database = mongodb_client[f'{database}']
-    mongodb_coll = mongodb_database[f'{coll}']
+    if coll not in mongodb_database.list_collection_names():
+        return False, False
 
+    mongodb_coll = mongodb_database[f'{coll}']
     cursor = mongodb_coll.find().sort({'Date':-1})
     return True, cursor.next()['Date']
 
@@ -62,7 +64,7 @@ def get_data_from_mongodb(client = "mongodb://localhost:27017", database = 'Stoc
         coll : MongoDB collection
         range :
             'all' -> all data
-            'last' -> last data (51 as a maximum)
+            'last' -> last data (gets 51 as a maximum)
     """   
     mongodb_client = MongoClient(f'{client}')
     mongodb_database = mongodb_client[f'{database}']
@@ -114,13 +116,31 @@ def get_candles_from_df(stock_df: pd.DataFrame, date=None, period=4) -> dict:
     candles = stock_df.iloc[(date_idx-(period-1)):(date_idx+1)].to_dict('dict')
     return candles
 
+def get_index_from_df(stock_df: pd.DataFrame, date: str) -> int:
+    """
+    :Gets index from pd.DataFrame for a certain date
+    
+    :Parameters:
+        stock_df : pd.Dataframe (provided by get_data_from_mongodb or data_downloader module /with all indicators/)
+        date : str / YYYY-MM-DD (if None: last day of pd.DataFrame)
+    
+    :Returns: int
+    """
+    if date not in stock_df['Date'].values:
+        raise Exception(f'No data for date: {date}!')
+    
+    return stock_df[stock_df['Date'] == date].index.item()  
+
 if __name__ == "__main__":
     print(check_data_in_mongodb())
     
-    stock_df = get_data_from_mongodb(range='last')
+    stock_df = get_data_from_mongodb()
     print(f'\n{stock_df}')  
-    # candles = get_candles_from_df(stock_df)
-    # print(f'\n{candles}')
+    
+    #candles = get_candles_from_df(stock_df)
+    #print(f'\n{candles}')
+    idx = get_index_from_df(stock_df, '2024-05-29')
+    print(stock_df['Date'][idx+1])
 
 
    

@@ -25,6 +25,24 @@ def check_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stoc
     cursor = mongodb_coll.find().sort({'Date':-1})
     return True, cursor.next()['Date']
 
+def get_collections_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> list:
+    """
+    :Returns the existing collections in MongoDB
+    
+    :Parameters:
+        client : MongoDB client
+        database : MongoDB database
+    :Returns:
+        False: if database doesn't exist
+        [list] - existing collections (in practice: the name of tickers with existing data)
+    """
+    mongodb_client = MongoClient(f'{client}')
+    if database not in mongodb_client.list_database_names():
+        return False
+    
+    mongodb_database = mongodb_client[f'{database}']
+    return mongodb_database.list_collection_names()
+
 def write_data_to_mongodb(stock_df: pd.DataFrame, client = "mongodb://localhost:27017", database = 'Stock_data',
                           coll = '^GSPC', replace = True):
     """
@@ -134,6 +152,8 @@ def get_index_from_df(stock_df: pd.DataFrame, date: str) -> int:
 if __name__ == "__main__":
     print(check_data_in_mongodb())
     
+    print(get_collections_from_mongodb())
+
     stock_df = get_data_from_mongodb()
     print(f'\n{stock_df}')  
     

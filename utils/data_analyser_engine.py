@@ -1,7 +1,10 @@
 import pandas as pd
 
 if __name__ != '__main__':
-    from .database_manager import get_candles_from_df
+    try:
+        from .database_manager import get_candles_from_df
+    except:
+        from database_manager import get_candles_from_df
 
 class AnalyserEngine:
 

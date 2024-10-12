@@ -32,7 +32,7 @@ def main_engine():
     # -> only available if date is not the last available data (not available for projections based on last day data)
     first_correct_data_of_yahoo = {'^GSPC': 22000, '^GDAXI': 1491, '^IXIC': 3459}    
     # -> yahoo database is not perfect; no suitable data is available in database before:
-    # -> ^GSPC: 1982-04-20 (index: 13605) 
+    # -> ^GSPC: 1982-04-20 (index: 13602) 
     # -> ^GDAXI: 1993-12-15 (index: 1491)
     # -> ^IXIC: 1984-10-12 (index: 3459)
     # ----------------------------------------

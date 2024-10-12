@@ -72,6 +72,26 @@ def write_data_to_mongodb(stock_df: pd.DataFrame, client = "mongodb://localhost:
             if len(list(cursor)) == 0:
                 mongodb_coll.insert_one(item)
 
+def get_first_correct_date(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC') -> list:
+    """
+    :Checks the database and returns the first correct index (and date / YYYY-MM-DD) downloaded from Yahoo Finance.
+    
+    :Parameters:
+        client : MongoDB client
+        database : MongoDB database
+        coll : MongoDB collection
+
+    :Returns (int, str) / False if no available data
+    """   
+    mongodb_client = MongoClient(f'{client}')
+    mongodb_database = mongodb_client[f'{database}']
+    mongodb_coll = mongodb_database[f'{coll}']
+    cursor = mongodb_coll.find()
+    for index, item in enumerate(cursor):
+        if item['Open'] != 0 and item['Open'] != item['High'] and item['Open'] != item['Low'] and item['Open'] != item['Close']:
+            return index, item['Date']
+    return False
+
 def get_data_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC', range = 'all') -> pd.DataFrame:
     """
     :Loads all data from MongoDB collection.
@@ -150,17 +170,16 @@ def get_index_from_df(stock_df: pd.DataFrame, date: str) -> int:
     return stock_df[stock_df['Date'] == date].index.item()  
 
 if __name__ == "__main__":
-    print(check_data_in_mongodb())
+    # print(check_data_in_mongodb())
     
-    print(get_collections_from_mongodb())
+    # print(get_collections_from_mongodb())
 
-    stock_df = get_data_from_mongodb()
-    print(f'\n{stock_df}')  
+    # stock_df = get_data_from_mongodb()
+    # print(f'\n{stock_df}')  
     
-    #candles = get_candles_from_df(stock_df)
-    #print(f'\n{candles}')
-    idx = get_index_from_df(stock_df, '2024-05-29')
-    print(stock_df['Date'][idx+1])
+    # candles = get_candles_from_df(stock_df)
+    # print(f'\n{candles}')
+    # idx = get_index_from_df(stock_df, '2024-05-29')
+    # print(stock_df['Date'][idx+1])
 
-
-   
+    print(get_first_correct_date())

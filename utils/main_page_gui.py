@@ -100,8 +100,21 @@ class Ui_MainWindow(object):
         self.dateEdit_start.setAutoFillBackground(False)
         self.dateEdit_start.setLocale(QtCore.QLocale(QtCore.QLocale.Language.English, QtCore.QLocale.Country.UnitedStates))
         self.dateEdit_start.setDateTime(QtCore.QDateTime(QtCore.QDate(2024, 1, 2), QtCore.QTime(0, 0, 0)))
-        self.dateEdit_start.setMinimumDateTime(QtCore.QDateTime(QtCore.QDate(2000, 1, 1), QtCore.QTime(0, 0, 0)))
+        self.dateEdit_start.setMinimumDateTime(QtCore.QDateTime(QtCore.QDate(1900, 1, 1), QtCore.QTime(0, 0, 0)))
         self.dateEdit_start.setCalendarPopup(True)
+        self.dateEdit_start.setEnabled(False)
+        self.dateEdit_start.setStyleSheet("""
+            QDateEdit:disabled {
+                background-color: #e0e0e0;
+                color: darkgray;
+                border: 1px solid gray;
+            }
+            QDateEdit:enabled {
+                background-color: white;
+                color: black;
+                border: 1px solid gray;
+            }
+        """)
         self.dateEdit_start.setObjectName("dateEdit_start")
         self.verticalLayout.addWidget(self.dateEdit_start)
         
@@ -114,18 +127,33 @@ class Ui_MainWindow(object):
         self.dateEdit_end.setAutoFillBackground(False)
         self.dateEdit_end.setLocale(QtCore.QLocale(QtCore.QLocale.Language.English, QtCore.QLocale.Country.UnitedStates))
         self.dateEdit_end.setDateTime(QtCore.QDateTime(QtCore.QDate(2024, 1, 2), QtCore.QTime(0, 0, 0)))
-        self.dateEdit_end.setMinimumDateTime(QtCore.QDateTime(QtCore.QDate(2000, 1, 1), QtCore.QTime(0, 0, 0)))
+        self.dateEdit_end.setMinimumDateTime(QtCore.QDateTime(QtCore.QDate(1900, 1, 1), QtCore.QTime(0, 0, 0)))
         self.dateEdit_end.setCalendarPopup(True)
+        self.dateEdit_end.setEnabled(False)
+        self.dateEdit_end.setStyleSheet("""
+            QDateEdit:disabled {
+                background-color: #e0e0e0;
+                color: darkgray;
+                border: 1px solid gray;
+            }
+            QDateEdit:enabled {
+                background-color: white;
+                color: black;
+                border: 1px solid gray;
+            }
+        """)
         self.dateEdit_end.setObjectName("dateEdit_end")
         self.verticalLayout.addWidget(self.dateEdit_end)
 
         self.checkBox_today = QtWidgets.QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_today.setText("Today")
+        self.checkBox_today.setCheckable(False)
         self.checkBox_today.setObjectName("checkBox_today")
         self.verticalLayout.addWidget(self.checkBox_today)
         
         self.checkBox_tomorrow = QtWidgets.QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_tomorrow.setText("Tomorrow")
+        self.checkBox_tomorrow.setCheckable(False)
         self.checkBox_tomorrow.setObjectName("checkBox_tomorrow")
         self.verticalLayout.addWidget(self.checkBox_tomorrow)
         
@@ -145,6 +173,7 @@ class Ui_MainWindow(object):
                 background-color: rgb(56, 152, 187);
             }
         """)
+        self.pushButton.setEnabled(False)
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout.addWidget(self.pushButton)
         

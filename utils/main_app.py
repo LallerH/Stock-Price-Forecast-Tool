@@ -11,34 +11,38 @@ if __name__ != '__main__':
                     show_histogram,\
                     show_candle_chart,\
                     show_all_charts,\
-                    check_data_in_mongodb
+                    check_data_in_mongodb,\
+                    get_first_correct_date
 
-def main_engine():
+def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     # ------------- MAIN DRIVERS -------------
-    ticker ='^GSPC'
+    
+    # -- ticker --
     # -> see ticker names on Yahoo Finance; tickers e.g.:
     # -> S&P500: ^GSPC
     # -> DAX: ^GDAXI
     # -> NASDAQ: ^IXIC
     # -> OTP: OTP.BD
     ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
-    date = '2024-10-04' # of last fact data; the projection will be prepared for the following day
+    
+    # -- date -- of last fact data; the projection will be prepared for the following day
+    
     compared_period = 3
     tolerance = 75
     # -> proposed set: period = 2-3 , tolerance = 50-100
     # -> lower period and higher tolerance more hit
+    
     chartwithfact = True
     # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
     # -> only available if date is not the last available data (not available for projections based on last day data)
-    first_correct_data_of_yahoo = {'^GSPC': 22000, '^GDAXI': 1491, '^IXIC': 3459}    
-    # -> yahoo database is not perfect; no suitable data is available in database before:
+
+    first_correct_data_of_yahoo = get_first_correct_date(coll=ticker)[0]
+    # -> yahoo database is not perfect; no suitable data is available in database before e.g:
     # -> ^GSPC: 1982-04-20 (index: 13602) 
     # -> ^GDAXI: 1993-12-15 (index: 1491)
     # -> ^IXIC: 1984-10-12 (index: 3459)
     # ----------------------------------------
     
-    if ticker not in first_correct_data_of_yahoo:
-        first_correct_data_of_yahoo.update({ticker: 0})
     if ticker not in ticker_name:
         ticker_name.update({ticker: ticker})
 
@@ -67,7 +71,7 @@ def main_engine():
     print('Comparing data, may take several minutes!\n')
 
     dates_of_matching_benchmark = {}
-    for index, row in stock_df.loc[first_correct_data_of_yahoo[ticker]+compared_period+50:].iterrows():
+    for index, row in stock_df.loc[first_correct_data_of_yahoo+compared_period+50:].iterrows():
         if pattern.date != row['Date']:
 
             benchmark_date = row['Date']
@@ -100,6 +104,7 @@ def main_engine():
     median_lowchg = pattern.stats('median_Lowchg')
     median_highchg = pattern.stats('median_Highchg')
     
+    print(candles_for_chart)
     print(median_highchg)
     print(median_lowchg)
 
@@ -111,7 +116,7 @@ def main_engine():
 if __name__ == '__main__':
     from data_downloader import download_from_yahoofin, add_indicator
     from database_manager import get_data_from_mongodb, write_data_to_mongodb, get_candles_from_df,\
-                                check_data_in_mongodb, get_index_from_df
+                                check_data_in_mongodb, get_index_from_df, get_first_correct_date
     from data_analyser_engine import AnalyserEngine
     from chart_generator import show_histogram, show_candle_chart, show_all_charts
     main_engine()

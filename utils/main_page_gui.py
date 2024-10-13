@@ -1,4 +1,5 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QIcon
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -6,6 +7,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle("Stock price forecast tool")
         MainWindow.resize(820, 620)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        MainWindow.setWindowIcon(QIcon('ikon.ico'))
         self.centralwidget.setObjectName("centralwidget")
         
         # verticalLayout --- setup area
@@ -71,10 +73,20 @@ class Ui_MainWindow(object):
         self.label_3.setObjectName("label_3")
         self.verticalLayout.addWidget(self.label_3)
         
-        self.listWidget_2 = QtWidgets.QListWidget(parent=self.verticalLayoutWidget)
-        self.listWidget_2.setEnabled(True)
-        self.listWidget_2.setObjectName("listWidget_2")
-        self.verticalLayout.addWidget(self.listWidget_2)
+        self.list_of_setupWidget = QtWidgets.QListWidget(parent=self.verticalLayoutWidget)
+        self.list_of_setupWidget.setEnabled(True)
+        self.list_of_setupWidget.setObjectName("list_of_setupWidget")
+        self.list_of_setupWidget.setStyleSheet("""
+            QListWidget::item:selected {
+                background-color: rgb(76, 172, 207);
+                color: white;
+            }
+            QListWidget::item:hover {
+                background-color: #D3D3D3;
+                color: black;
+            }
+        """)
+        self.verticalLayout.addWidget(self.list_of_setupWidget)
         
         self.label_4 = QtWidgets.QLabel(parent=self.verticalLayoutWidget)
         self.label_4.setText("Choose range and forecast day:")
@@ -148,12 +160,24 @@ class Ui_MainWindow(object):
         self.checkBox_today = QtWidgets.QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_today.setText("Today")
         self.checkBox_today.setCheckable(False)
+        self.checkBox_today.setEnabled(False)
+        self.checkBox_today.setStyleSheet("""
+            QCheckBox:disabled {
+                color: darkgrey;
+            }
+        """)
         self.checkBox_today.setObjectName("checkBox_today")
         self.verticalLayout.addWidget(self.checkBox_today)
         
         self.checkBox_tomorrow = QtWidgets.QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_tomorrow.setText("Tomorrow")
         self.checkBox_tomorrow.setCheckable(False)
+        self.checkBox_tomorrow.setEnabled(False)
+        self.checkBox_tomorrow.setStyleSheet("""
+            QCheckBox:disabled {
+                color: darkgrey;
+            }
+        """)
         self.checkBox_tomorrow.setObjectName("checkBox_tomorrow")
         self.verticalLayout.addWidget(self.checkBox_tomorrow)
         

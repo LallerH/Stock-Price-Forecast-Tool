@@ -8,9 +8,6 @@ if __name__ != '__main__':
                     get_candles_from_df,\
                     get_index_from_df,\
                     AnalyserEngine,\
-                    show_histogram,\
-                    show_candle_chart,\
-                    show_all_charts,\
                     check_data_in_mongodb,\
                     get_first_correct_date
 
@@ -107,6 +104,8 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     print(candles_for_chart)
     print(median_highchg)
     print(median_lowchg)
+
+    return candles_for_chart, median_highchg, median_lowchg
 
     # show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
     #                 Highchg=pattern.next_day_chg_dict['Highchg'],

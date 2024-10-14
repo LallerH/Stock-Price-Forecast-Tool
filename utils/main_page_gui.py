@@ -19,12 +19,12 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         
         # verticalLayout_workplace --- workplace area
-        self.verticalLayoutWidget_2 = QtWidgets.QWidget(parent=self.centralwidget)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(229, 9, 571, 541))
-        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
-        self.verticalLayout_workplace = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.workplaceLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
+        self.workplaceLayoutWidget.setGeometry(QtCore.QRect(229, 9, 571, 541))
+        self.workplaceLayoutWidget.setObjectName("workplaceLayoutWidget")
+        self.verticalLayout_workplace = QtWidgets.QVBoxLayout(self.workplaceLayoutWidget)
         self.verticalLayout_workplace.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_workplace.setObjectName("verticalLayout_workplace")
+        self.verticalLayout_workplace.setObjectName("workplaceLayoutWidget")
         MainWindow.setCentralWidget(self.centralwidget)
 
         # --- set WIDGETS of setup area

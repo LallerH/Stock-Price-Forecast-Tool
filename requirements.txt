@@ -4,3 +4,5 @@ pandas_ta==0.3.14b0
 pymongo==4.6.3
 yfinance==0.2.37
 numpy==1.26.4
+PyQt6==6.7.1
+mplfinance==0.12.10b0

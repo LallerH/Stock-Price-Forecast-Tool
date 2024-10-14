@@ -116,7 +116,7 @@ def show_candle_chart(stock_data: dict, ticker: str, date: str, projection = Non
     :Parameters:
         stock_data : {dict}; returned by get_candle_from_df methods
         ticker: 'str'; stock name to be shown in title
-        date : 'str'; date to be shown in title
+        date: 'str'; date to be shown in title
         projection : {'Lowchg': int, 'Highchg': int};
         chartwithfact : bool; True -> sets a fact candle after projection candle
     """

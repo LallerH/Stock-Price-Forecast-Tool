@@ -5,7 +5,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowTitle("Stock price forecast tool")
-        MainWindow.resize(820, 620)
+        MainWindow.resize(1024, 620)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         MainWindow.setWindowIcon(QIcon('ikon.ico'))
         self.centralwidget.setObjectName("centralwidget")
@@ -20,7 +20,7 @@ class Ui_MainWindow(object):
         
         # verticalLayout_workplace --- workplace area
         self.workplaceLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.workplaceLayoutWidget.setGeometry(QtCore.QRect(229, 9, 571, 541))
+        self.workplaceLayoutWidget.setGeometry(QtCore.QRect(229, 9, 775, 541))
         self.workplaceLayoutWidget.setObjectName("workplaceLayoutWidget")
         self.verticalLayout_workplace = QtWidgets.QVBoxLayout(self.workplaceLayoutWidget)
         self.verticalLayout_workplace.setContentsMargins(0, 0, 0, 0)
@@ -341,7 +341,24 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuSetup_indicators.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
-        # Set statusbar
+        # TabWidgets on WORKPLACE
+        self.tabs = QtWidgets.QTabWidget()
+
+        self.tab_indicator = QtWidgets.QWidget()
+        self.tab_histogram = QtWidgets.QWidget()
+        self.tab_candlestick = QtWidgets.QWidget()
+
+        self.tabs.addTab(self.tab_indicator, "Indicator settings")
+        self.tabs.addTab(self.tab_histogram, "Histogram")
+        self.tabs.addTab(self.tab_candlestick, "Candlestick chart")
+
+        self.verticalLayout_workplace.addWidget(self.tabs)
+
+        self.indicator_layout = QtWidgets.QVBoxLayout(self.tab_indicator)
+        self.histogram_layout = QtWidgets.QVBoxLayout(self.tab_histogram)
+        self.candlestick_layout = QtWidgets.QVBoxLayout(self.tab_candlestick)
+
+        # Set STATUSBAR
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)

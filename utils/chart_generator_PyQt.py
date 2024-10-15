@@ -59,7 +59,7 @@ class CandlestickChart(QWidget):
         if projection:
             height = stock_data['High'][indexes[-1]] * projection['Highchg'] - stock_data['Low'][indexes[-1]] * projection['Lowchg']
             bottom = stock_data['Low'][indexes[-1]] * projection['Lowchg']
-            self.fig.suptitle(f'{ticker} chart with LOW and HIGH price projection\n for the day after {date}')
+            self.fig.suptitle(f'{ticker} chart with LOW and HIGH price projection\n for the day {date}')
 
             if height >= 0:
                 plt.bar('Projection', height, 0.3, bottom, edgecolor='black', fill = False, hatch='\\')
@@ -72,7 +72,7 @@ class CandlestickChart(QWidget):
 
         if chartwithfact:
             if stock_data['Close'][factindex] >= stock_data['Open'][factindex]:
-                x_coordinate = (f'{date} fact')
+                x_coordinate = ('Fact')
                 height_top = stock_data['High'][factindex] - stock_data['Close'][factindex]
                 height_body = stock_data['Close'][factindex] - stock_data['Open'][factindex]
                 height_bottom = stock_data['Open'][factindex] - stock_data['Low'][factindex]

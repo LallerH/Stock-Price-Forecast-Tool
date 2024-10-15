@@ -105,28 +105,30 @@ if __name__ == '__main__':
             message_box.setText(text)
             message_box.exec()           
 
-        projection_date = ui.dateEdit_end.date()
+        parameters.projection_date = ui.dateEdit_end.date()
 
-        if projection_date.dayOfWeek() == 6:
-            show_message(f"{projection_date.toString('yyyy. MM. dd.')} is Saturday, projection will be made for next working day!")
-            last_base_date = projection_date.addDays(-1)
-        elif projection_date.dayOfWeek() == 7:
-            show_message(f"{projection_date.toString('yyyy. MM. dd.')} is Sunday, projection will be made for next working day!")
-            last_base_date = projection_date.addDays(-2)
-        elif projection_date.dayOfWeek() == 1:
-            last_base_date = projection_date.addDays(-3)
+        if parameters.projection_date.dayOfWeek() == 6:
+            show_message(f"{parameters.projection_date.toString('yyyy. MM. dd.')} is Saturday, projection will be made for next working day!")
+            last_base_date = parameters.projection_date.addDays(-1)
+        elif parameters.projection_date.dayOfWeek() == 7:
+            show_message(f"{parameters.projection_date.toString('yyyy. MM. dd.')} is Sunday, projection will be made for next working day!")
+            last_base_date = parameters.projection_date.addDays(-2)
+        elif parameters.projection_date.dayOfWeek() == 1:
+            last_base_date = parameters.projection_date.addDays(-3)
         else:
-            last_base_date = projection_date.addDays(-1)
+            last_base_date = parameters.projection_date.addDays(-1)
 
         last_base_date = last_base_date.toString('yyyy-MM-dd')
-        candles_for_chart, median_highchg, median_lowchg = main_engine(ticker=parameters.ticker, date=last_base_date)
+        candles_for_chart, median_highchg, median_lowchg = main_engine(ticker=parameters.ticker, date=last_base_date)      
         # candles_for_chart = {'Date': {24308: '2024-10-08', 24309: '2024-10-09', 24310: '2024-10-10', 24311: '2024-10-11'}, 'Open': {24308: 5719.14013671875, 24309: 5751.7998046875, 24310: 5778.35986328125, 24311: 5775.08984375}, 'High': {24308: 5757.60009765625, 24309: 5796.7998046875, 24310: 5795.02978515625, 24311: 5822.1298828125}, 'Low': {24308: 5714.56005859375, 24309: 5745.02001953125, 24310: 5764.759765625, 24311: 5775.08984375}, 'Close': {24308: 5751.1298828125, 24309: 5792.0400390625, 24310: 5780.0498046875, 24311: 5815.02978515625}, 'Volume': {24308: 3393400000, 24309: 3650340000, 24310: 3208790000, 24311: 3208720000}, 'RSI': {24308: 60.37452529959091, 24309: 63.81031751097014, 24310: 62.19211081518803, 24311: 65.12220261954819}, 'RSIavg': {24308: 61.44269895314572, 24309: 61.148276979436076, 24310: 60.92436451499597, 24311: 60.668950130783074}, 'MACD': {24308: 53.413354176355824, 24309: 55.95209999780673, 24310: 56.32073547858454, 24311: 58.683032380746226}, 'MACDhist': {24308: -6.627532334037525, 24309: -3.364760170965539, 24310: -2.4194047127406435, 24311: -0.04568624846316993}, 'MACDavg': {24308: 60.04088651039335, 24309: 59.316860168772266, 24310: 58.74014019132518, 24311: 58.728718629209396}, 'SMA20': {24308: 5690.708935546875, 24309: 5702.604443359375, 24310: 5711.8189453125, 24311: 5721.26943359375}, 'SMA50': {24308: 5564.42078125, 24309: 5571.532783203125, 24310: 5576.687783203125, 24311: 5584.054775390625}}
         # median_highchg = 1.0015765079466905
         # median_lowchg = 1.0029128343522764
-        candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date, projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
-                                             parent=ui.workplaceLayoutWidget)
-        ui.verticalLayout_workplace.addWidget(candlestick_chart)
+        candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date.toString('yyyy. MM. dd.'), projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
+                                            chartwithfact=True, parent=ui.workplaceLayoutWidget)
+
+        ui.candlestick_layout.addWidget(candlestick_chart)
         candlestick_chart.show()
+        ui.tabs.setCurrentIndex(2)
 
 
     ui.pushButton.clicked.connect(start_main_engine)

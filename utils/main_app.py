@@ -24,7 +24,7 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     
     # -- date -- of last fact data; the projection will be prepared for the following day
     
-    compared_period = 3
+    compared_period = 2
     tolerance = 75
     # -> proposed set: period = 2-3 , tolerance = 50-100
     # -> lower period and higher tolerance more hit

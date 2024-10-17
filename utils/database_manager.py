@@ -140,7 +140,8 @@ def get_candles_from_df(stock_df: pd.DataFrame, date=None, period=4) -> dict:
         return candles
 
     if date not in stock_df['Date'].values:
-        raise Exception(f'No data for date: {date}!')
+        # raise Exception(f'No data for date: {date}!')
+        return False
     
     date_idx = stock_df[stock_df['Date'] == date].index.item()
     

@@ -5,7 +5,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowTitle("Stock price forecast tool")
-        MainWindow.resize(1024, 620)
+        MainWindow.resize(1024, 610)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         MainWindow.setWindowIcon(QIcon('ikon.ico'))
         self.centralwidget.setObjectName("centralwidget")
@@ -361,8 +361,57 @@ class Ui_MainWindow(object):
         # Set STATUSBAR
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
+        self.statusbar.setStyleSheet("""
+            QStatusBar {
+                background-color: transparent;
+                border: none;
+            }
+            QStatusBar::item {
+                border: none;
+            }
+        """)
         MainWindow.setStatusBar(self.statusbar)
-            
+        
+        # Set PROGRESSBAR
+        self.label_progress = QtWidgets.QLabel()
+        self.label_progress.setText("Processing data:")
+        self.label_progress.setObjectName("label_progress")
+        
+        self.progress_bar = QtWidgets.QProgressBar()
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid grey;
+                background-color: #E0E0E0;
+                text-align: center;
+            }
+            QProgressBar::chunk {
+                background-color: rgb(76, 172, 207);
+                margin: 1px;
+            }
+        """)
+        self.progress_bar.setFormat('%p%')
+        self.progress_bar.setFixedHeight(20)
+        self.progress_bar.setFixedWidth(200)
+        self.spacer = QtWidgets.QWidget()
+        self.spacer.setStyleSheet("background-color: transparent; border: none;")
+        self.statusbar.addWidget(self.spacer, 1)
+
+def show_message(text):
+    message_box = QtWidgets.QMessageBox()
+    message_box.setWindowIcon(QIcon('ikon.ico'))
+    message_box.setIcon(QtWidgets.QMessageBox.Icon.Information)
+    message_box.setWindowTitle("Projection date info")
+    message_box.setText(text)
+    message_box.exec()           
+
+def hide_widgets(layout):
+    for i in range(layout.count() - 1, -1, -1):
+        item = layout.itemAt(i)
+        if item:
+            widget = item.widget()
+            if widget:
+                widget.hide()
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

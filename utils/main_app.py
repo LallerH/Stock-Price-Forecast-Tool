@@ -11,7 +11,7 @@ if __name__ != '__main__':
                     check_data_in_mongodb,\
                     get_first_correct_date
 
-def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
+def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', chartwithfact=True):
     # ------------- MAIN DRIVERS -------------
     
     # -- ticker --
@@ -24,12 +24,12 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     
     # -- date -- of last fact data; the projection will be prepared for the following day
     
-    compared_period = 2
-    tolerance = 75
+    compared_period = 3
+    tolerance = 100
     # -> proposed set: period = 2-3 , tolerance = 50-100
     # -> lower period and higher tolerance more hit
     
-    chartwithfact = True
+    # --- chartwithfact
     # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
     # -> only available if date is not the last available data (not available for projections based on last day data)
 
@@ -60,6 +60,8 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     print(f'{stock_df}\n')
 
     candles = get_candles_from_df(stock_df, date=date, period=compared_period+1)
+    if candles == False:
+        return False, False, False, False
     print(f'Candles:\n{candles}\n')
 
     pattern = AnalyserEngine(candles, period=compared_period)
@@ -67,9 +69,21 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
 
     print('Comparing data, may take several minutes!\n')
 
+    if progress_bar != False:
+        progress_bar.setValue(0)
+        progress_bar_max = 0
+        progress_bar_value = 0
+        for index, row in stock_df.loc[first_correct_data_of_yahoo+compared_period+50:].iterrows():
+            progress_bar_max += 1
+        progress_bar.setMaximum(progress_bar_max)
+   
     dates_of_matching_benchmark = {}
     for index, row in stock_df.loc[first_correct_data_of_yahoo+compared_period+50:].iterrows():
         if pattern.date != row['Date']:
+            
+            if progress_bar != False:
+                progress_bar_value += 1
+                progress_bar.setValue(progress_bar_value)
 
             benchmark_date = row['Date']
             candles_benchmark = get_candles_from_df(stock_df, benchmark_date, period=compared_period+1)
@@ -105,7 +119,7 @@ def main_engine(ticker ='^GSPC', date = '2024-10-11' ):
     print(median_highchg)
     print(median_lowchg)
 
-    return candles_for_chart, median_highchg, median_lowchg
+    return candles_for_chart, median_highchg, median_lowchg, chartwithfact
 
     # show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
     #                 Highchg=pattern.next_day_chg_dict['Highchg'],

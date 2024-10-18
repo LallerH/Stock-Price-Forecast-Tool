@@ -119,7 +119,7 @@ def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', char
     print(median_highchg)
     print(median_lowchg)
 
-    return candles_for_chart, median_highchg, median_lowchg, chartwithfact
+    return candles_for_chart, median_highchg, median_lowchg, chartwithfact, pattern.next_day_chg_dict
 
     # show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
     #                 Highchg=pattern.next_day_chg_dict['Highchg'],

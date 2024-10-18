@@ -3,7 +3,8 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
-from utils import Ui_MainWindow, main_engine, get_collections_from_mongodb, Parameters, get_first_correct_date, CandlestickChart, show_message, hide_widgets
+from utils import Ui_MainWindow, main_engine, get_collections_from_mongodb,\
+                  Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets
 
 if __name__ == '__main__':
 
@@ -98,6 +99,7 @@ if __name__ == '__main__':
     def start_main_engine():
 
         hide_widgets(ui.candlestick_layout)
+        hide_widgets(ui.histogram_layout)
 
         parameters.projection_date = ui.dateEdit_end.date()
 
@@ -123,13 +125,16 @@ if __name__ == '__main__':
         ui.progress_bar.show()
         QtWidgets.QApplication.processEvents()
 
-        candles_for_chart, median_highchg, median_lowchg, chartwithfact = main_engine(ui.progress_bar, ticker=parameters.ticker, date=last_base_date, chartwithfact=True)      
+        candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict = main_engine(ui.progress_bar, ticker=parameters.ticker, date=last_base_date, chartwithfact=True)      
         if candles_for_chart != False:
             candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date.toString('yyyy-MM-dd'), projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
-                                                chartwithfact=chartwithfact, parent=ui.workplaceLayoutWidget)
+                                                chartwithfact=chartwithfact, parent=ui.workplaceLayoutWidget)          
+            histogram_chart = HistogramChart(parameters.projection_date.toString('yyyy-MM-dd'), parameters.ticker, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
 
             ui.candlestick_layout.addWidget(candlestick_chart)
             candlestick_chart.show()
+            ui.histogram_layout.addWidget(histogram_chart)
+            histogram_chart.show()
             ui.tabs.setCurrentIndex(2)
             ui.progress_bar.hide()
             ui.label_progress.hide()

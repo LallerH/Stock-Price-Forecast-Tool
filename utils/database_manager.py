@@ -1,6 +1,41 @@
 from pymongo import MongoClient
 import pandas as pd
 
+def check_database_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> bool:
+    """
+    :Check the existence of mongodb database
+    
+    :Parameters:
+        client : MongoDB client
+        database : MongoDB database
+    :Returns:
+        True : if database exists
+        False : if database not exists
+    """
+    mongodb_client = MongoClient(f'{client}')
+    if database not in mongodb_client.list_database_names():
+        return False
+
+    return True
+
+def initial_upload_of_database(client = "mongodb://localhost:27017", database = 'Stock_data'):
+    from .data_downloader import download_from_yahoofin, add_indicator
+    """
+    :Check the existence of mongodb database
+    
+    :Parameters:
+        client : MongoDB client
+        database : MongoDB database
+    """
+    mongodb_client = MongoClient(f'{client}')
+    database = mongodb_client[database]
+    
+    tickers = ('^GSPC','^GDAXI','^IXIC')
+    for item in tickers:
+        stock_df = download_from_yahoofin(ticker=item, period='max')
+        stock_df = add_indicator(stock_df, indicator='all')
+        write_data_to_mongodb(stock_df, coll=item)
+
 def check_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC') -> bool:
     """
     :Check the existence of mongodb database/collection

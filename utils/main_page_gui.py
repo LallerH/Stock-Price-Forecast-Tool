@@ -400,7 +400,7 @@ def show_message(text):
     message_box = QtWidgets.QMessageBox()
     message_box.setWindowIcon(QIcon('ikon.ico'))
     message_box.setIcon(QtWidgets.QMessageBox.Icon.Information)
-    message_box.setWindowTitle("Projection date info")
+    message_box.setWindowTitle("Information")
     message_box.setText(text)
     message_box.exec()           
 

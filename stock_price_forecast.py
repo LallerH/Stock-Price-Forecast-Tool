@@ -4,7 +4,8 @@ from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
 from utils import Ui_MainWindow, main_engine, get_collections_from_mongodb,\
-                  Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets
+                  Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets,\
+                  check_database_in_mongodb, initial_upload_of_database
 
 if __name__ == '__main__':
 
@@ -21,12 +22,27 @@ if __name__ == '__main__':
         setbutton()
         setdates()
 
+    if not check_database_in_mongodb(database = 'Stock_data'):
+        show_message('Click to start the initial setup of database!')
+        print('Downloading...')
+        try:
+            initial_upload_of_database(database = 'Stock_data')
+            show_message('Initial setup of database succeded!\nInitial download of S&P, DAX and NASDAQ indexes succeeded!')
+        except:
+            show_message('Initial setup of database was not succeeded!\nRequired:\n- database manager MongoDB (mongodb://localhost:27017)\n- internet connection')
+            sys.exit(app.exec())
+
     if get_collections_from_mongodb():
         list_of_tickers = sorted(get_collections_from_mongodb())
         ui.list_of_tickersWidget.addItems(list_of_tickers)
     else:
-        ...
-        # ... alapfeltöltést csinálni: ^GSPC
+        print('Downloading...')
+        try:
+            initial_upload_of_database(database = 'Stock_data')
+            show_message('Initial setup of database succeded!\nInitial download of S&P, DAX and NASDAQ indexes succeeded!')
+        except:
+            show_message('Initial setup of database was not succeeded!\nRequired:\n- database manager MongoDB (mongodb://localhost:27017)\n- internet connection')
+            sys.exit(app.exec())
 
     ui.list_of_tickersWidget.itemSelectionChanged.connect(on_ticker_selection_changed)
     
@@ -125,12 +141,18 @@ if __name__ == '__main__':
         ui.progress_bar.show()
         QtWidgets.QApplication.processEvents()
 
-        candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict = main_engine(ui.progress_bar, ticker=parameters.ticker, date=last_base_date, chartwithfact=True)      
-        if candles_for_chart != False:
+        success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict = main_engine(ui.progress_bar, ticker=parameters.ticker, date=last_base_date, chartwithfact=True)      
+        # print(success)
+        # print(candles_for_chart)
+        # print(median_highchg)
+        # print(median_lowchg)
+        # print(chartwithfact)
+        # print(next_day_chg_dict)
+
+        if success[0]:
             candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date.toString('yyyy-MM-dd'), projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
                                                 chartwithfact=chartwithfact, parent=ui.workplaceLayoutWidget)          
             histogram_chart = HistogramChart(parameters.projection_date.toString('yyyy-MM-dd'), parameters.ticker, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
-
             ui.candlestick_layout.addWidget(candlestick_chart)
             candlestick_chart.show()
             ui.histogram_layout.addWidget(histogram_chart)
@@ -139,7 +161,9 @@ if __name__ == '__main__':
             ui.progress_bar.hide()
             ui.label_progress.hide()
         else:
-            show_message("CLOSED fact data for the day before projection date doesn't exist!\nPlease wait the market closure!")
+            show_message(success[1])
+            ui.progress_bar.hide()
+            ui.label_progress.hide()
 
     ui.pushButton.clicked.connect(start_main_engine)
 

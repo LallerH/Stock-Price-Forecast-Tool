@@ -11,7 +11,7 @@ if __name__ != '__main__':
                     check_data_in_mongodb,\
                     get_first_correct_date
 
-def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', chartwithfact=True):
+def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', chartwithfact=True):
     # ------------- MAIN DRIVERS -------------
     
     # -- ticker --
@@ -61,7 +61,8 @@ def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', char
 
     candles = get_candles_from_df(stock_df, date=date, period=compared_period+1)
     if candles == False:
-        return False, False, False, False
+        message = "CLOSED fact data for the day before projection date doesn't exist!\nPlease wait the market closure!"
+        return (False, message), False, False, False, False, False
     print(f'Candles:\n{candles}\n')
 
     pattern = AnalyserEngine(candles, period=compared_period)
@@ -97,8 +98,8 @@ def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', char
      
     print(f'{dates_of_matching_benchmark}\n')
     if dates_of_matching_benchmark == {}:
-        print('No hit with the drivers set!\n')
-        sys.exit()
+        message = "No hit with the chosen indicator setup!"
+        return (False, message), False, False, False, False, False
 
     pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
     
@@ -119,7 +120,8 @@ def main_engine(progress_bar = False, ticker ='^GSPC', date = '2024-10-11', char
     print(median_highchg)
     print(median_lowchg)
 
-    return candles_for_chart, median_highchg, median_lowchg, chartwithfact, pattern.next_day_chg_dict
+    success = (True, '')
+    return success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, pattern.next_day_chg_dict
 
     # show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
     #                 Highchg=pattern.next_day_chg_dict['Highchg'],

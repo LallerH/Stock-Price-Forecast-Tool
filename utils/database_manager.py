@@ -116,7 +116,7 @@ def get_first_correct_date(client = "mongodb://localhost:27017", database = 'Sto
         database : MongoDB database
         coll : MongoDB collection
 
-    :Returns (int, str) / False if no available data
+    :Returns (index - int, 'yyyy-MM-dd' - str) / False if no available data
     """   
     mongodb_client = MongoClient(f'{client}')
     mongodb_database = mongodb_client[f'{database}']

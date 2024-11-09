@@ -5,5 +5,6 @@ from .database_manager import get_data_from_mongodb, write_data_to_mongodb, get_
 from .data_analyser_engine import AnalyserEngine
 from .chart_generator_PyQt import CandlestickChart, HistogramChart
 from .main_page_gui import Ui_MainWindow, show_message, hide_widgets
+from .indicator_setup_page_gui import IndicatorSetup_Form
 from .main_app import main_engine
 from .calculation_object import Parameters

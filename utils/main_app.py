@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+from PyQt6.QtCore import QDate
 if __name__ != '__main__':
     from utils import download_from_yahoofin,\
                     add_indicator,\
@@ -11,7 +12,7 @@ if __name__ != '__main__':
                     check_data_in_mongodb,\
                     get_first_correct_date
 
-def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', chartwithfact=True):
+def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-01-01', last_base_date = '2024-10-18', chartwithfact=True):
     # ------------- MAIN DRIVERS -------------
     
     # -- ticker --
@@ -22,7 +23,7 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
     # -> OTP: OTP.BD
     ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
     
-    # -- date -- of last fact data; the projection will be prepared for the following day
+    # -- last_base_date -- of last fact data; the projection will be prepared for the following day
     
     compared_period = 3
     tolerance = 100
@@ -31,14 +32,14 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
     
     # --- chartwithfact
     # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
-    # -> only available if date is not the last available data (not available for projections based on last day data)
-
-    first_correct_data_of_yahoo = get_first_correct_date(coll=ticker)[0]
+    # -> only available if last_base_date is not the last available data (not available for projections based on last day data)
+    
+    # first_base_date_index = get_first_correct_date(coll=ticker)[0]
     # -> yahoo database is not perfect; no suitable data is available in database before e.g:
     # -> ^GSPC: 1982-04-20 (index: 13602) 
     # -> ^GDAXI: 1993-12-15 (index: 1491)
     # -> ^IXIC: 1984-10-12 (index: 3459)
-    # ----------------------------------------
+    # ----------------------------------------      
     
     if ticker not in ticker_name:
         ticker_name.update({ticker: ticker})
@@ -59,7 +60,7 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
     stock_df = get_data_from_mongodb(coll=ticker)
     print(f'{stock_df}\n')
 
-    candles = get_candles_from_df(stock_df, date=date, period=compared_period+1)
+    candles = get_candles_from_df(stock_df, date=last_base_date, period=compared_period+1)
     if candles == False:
         message = "CLOSED fact data for the day before projection date doesn't exist!\nPlease wait the market closure!"
         return (False, message), False, False, False, False, False
@@ -70,16 +71,22 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
 
     print('Comparing data, may take several minutes!\n')
 
+    first_base_date = QDate.fromString(first_base_date, 'yyyy-MM-dd')
+    while stock_df[stock_df['Date'] == first_base_date.toString('yyyy-MM-dd')].empty:
+        first_base_date = first_base_date.addDays(1)
+    else: 
+        first_base_date_index = stock_df[stock_df['Date'] == first_base_date.toString('yyyy-MM-dd')].index[0]
+
     if progress_bar != False:
         progress_bar.setValue(0)
         progress_bar_max = 0
         progress_bar_value = 0
-        for index, row in stock_df.loc[first_correct_data_of_yahoo+compared_period+50:].iterrows():
+        for index, row in stock_df.loc[first_base_date_index+compared_period+50:].iterrows():
             progress_bar_max += 1
         progress_bar.setMaximum(progress_bar_max)
    
     dates_of_matching_benchmark = {}
-    for index, row in stock_df.loc[first_correct_data_of_yahoo+compared_period+50:].iterrows():
+    for index, row in stock_df.loc[first_base_date_index+compared_period+50:].iterrows():
         if pattern.date != row['Date']:
             
             if progress_bar != False:
@@ -103,14 +110,14 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
 
     pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
     
-    if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, date):
-        last_day = stock_df['Date'][get_index_from_df(stock_df, date)+1]
-    elif chartwithfact and not stock_df.tail(1).index[0] > get_index_from_df(stock_df, date):
-        last_day = date
+    if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, last_base_date):
+        last_day = stock_df['Date'][get_index_from_df(stock_df, last_base_date)+1]
+    elif chartwithfact and not stock_df.tail(1).index[0] > get_index_from_df(stock_df, last_base_date):
+        last_day = last_base_date
         chartwithfact = False
-        print(f'Fact data for the following date of {date} is not available!\n')
+        print(f'Fact data for the following date of {last_base_date} is not available!\n')
     else:
-        last_day = date
+        last_day = last_base_date
     
     candles_for_chart = get_candles_from_df(stock_df, date=last_day, period=compared_period+1)
     median_lowchg = pattern.stats('median_Lowchg')
@@ -121,12 +128,7 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', date = '2024-10-18', cha
     print(median_lowchg)
 
     success = (True, '')
-    return success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, pattern.next_day_chg_dict
-
-    # show_all_charts(candles_for_chart, date, ticker_name[ticker], Lowchg=pattern.next_day_chg_dict['Lowchg'],
-    #                 Highchg=pattern.next_day_chg_dict['Highchg'],
-    #                 projection={'Lowchg': median_lowchg, 'Highchg': median_highchg}, chartwithfact=chartwithfact)
-    
+    return success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, pattern.next_day_chg_dict  
 
 if __name__ == '__main__':
     from data_downloader import download_from_yahoofin, add_indicator

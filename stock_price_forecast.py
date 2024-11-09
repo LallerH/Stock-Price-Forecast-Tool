@@ -3,7 +3,7 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
-from utils import Ui_MainWindow, main_engine, get_collections_from_mongodb,\
+from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_collections_from_mongodb,\
                   Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets,\
                   check_database_in_mongodb, initial_upload_of_database
 
@@ -55,6 +55,12 @@ if __name__ == '__main__':
 
     ui.list_of_setupWidget.itemSelectionChanged.connect(on_setup_selection_changed)
     ui.list_of_setupWidget.setCurrentRow(0)
+
+    indicators = QtWidgets.QWidget()
+    indicator_form = IndicatorSetup_Form()
+    indicator_form.setupUi(indicators)
+    ui.indicator_layout.addWidget(indicators)
+
 
     # --- manage DATE SELECTION
     def setdates():
@@ -118,6 +124,7 @@ if __name__ == '__main__':
         hide_widgets(ui.histogram_layout)
 
         parameters.projection_date = ui.dateEdit_end.date()
+        parameters.first_base_date = ui.dateEdit_start.date()
 
         if parameters.projection_date.dayOfWeek() == 6:
             show_message(f"{parameters.projection_date.toString('yyyy. MM. dd.')} is Saturday, projection will be made for next working day!")
@@ -133,7 +140,8 @@ if __name__ == '__main__':
             last_base_date = parameters.projection_date.addDays(-1)
 
         last_base_date = last_base_date.toString('yyyy-MM-dd')
-        
+        first_base_date = parameters.first_base_date.toString('yyyy-MM-dd')
+
         ui.statusbar.addWidget(ui.label_progress)
         ui.label_progress.show()
         ui.statusbar.addWidget(ui.progress_bar)
@@ -141,17 +149,12 @@ if __name__ == '__main__':
         ui.progress_bar.show()
         QtWidgets.QApplication.processEvents()
 
-        success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict = main_engine(ui.progress_bar, ticker=parameters.ticker, date=last_base_date, chartwithfact=True)      
-        # print(success)
-        # print(candles_for_chart)
-        # print(median_highchg)
-        # print(median_lowchg)
-        # print(chartwithfact)
-        # print(next_day_chg_dict)
+        success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict =\
+        main_engine(ui.progress_bar, ticker=parameters.ticker, first_base_date=first_base_date, last_base_date=last_base_date, chartwithfact=True)      
 
         if success[0]:
             candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date.toString('yyyy-MM-dd'), projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
-                                                chartwithfact=chartwithfact, parent=ui.workplaceLayoutWidget)          
+                                                chartwithfact=chartwithfact)          
             histogram_chart = HistogramChart(parameters.projection_date.toString('yyyy-MM-dd'), parameters.ticker, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
             ui.candlestick_layout.addWidget(candlestick_chart)
             candlestick_chart.show()

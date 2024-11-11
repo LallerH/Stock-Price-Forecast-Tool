@@ -61,6 +61,7 @@ if __name__ == '__main__':
     indicator_form.setupUi(indicators)
     ui.indicator_layout.addWidget(indicators)
 
+    indicator_form.reset_indicators()
 
     # --- manage DATE SELECTION
     def setdates():

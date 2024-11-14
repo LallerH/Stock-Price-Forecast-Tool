@@ -39,7 +39,14 @@ class IndicatorSetup_Form(object):
         self.formLayoutWidget.setObjectName("formLayoutWidget")
         self.gridLayout = QtWidgets.QGridLayout(self.formLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.setObjectName("gridLayout")
+        self.formLayoutWidget.setStyleSheet("""
+            QSpinBox:disabled {
+                color: lightgrey;
+            }
+            QSpinSlider:disabled {
+                color: lightgrey;
+            }
+        """)
 
         # DAYS / INTERVALL
         self.label_days = QtWidgets.QLabel(parent=self.horizontalLayoutWidget)
@@ -67,7 +74,6 @@ class IndicatorSetup_Form(object):
         self.spinBox_low.setMaximum(200)
         self.spinBox_low.setSingleStep(5)
         self.spinBox_low.setProperty("value", 100)
-        self.spinBox_low.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
         self.gridLayout.addWidget(self.spinBox_low, 0, 1, 1, 1)
 
         self.Slider_low = QtWidgets.QSlider(parent=self.formLayoutWidget)
@@ -93,7 +99,6 @@ class IndicatorSetup_Form(object):
         self.spinBox_open.setMaximum(200)
         self.spinBox_open.setSingleStep(5)
         self.spinBox_open.setProperty("value", 100)
-        self.spinBox_open.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
         self.gridLayout.addWidget(self.spinBox_open, 1, 1, 1, 1)
 
         self.Slider_open = QtWidgets.QSlider(parent=self.formLayoutWidget)
@@ -121,7 +126,6 @@ class IndicatorSetup_Form(object):
         self.spinBox_high.setMaximum(200)
         self.spinBox_high.setSingleStep(5)
         self.spinBox_high.setProperty("value", 100)
-        self.spinBox_high.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
         self.gridLayout.addWidget(self.spinBox_high, 2, 1, 1, 1)
 
         self.Slider_high = QtWidgets.QSlider(parent=self.formLayoutWidget)
@@ -147,7 +151,6 @@ class IndicatorSetup_Form(object):
         self.spinBox_body.setMaximum(200)
         self.spinBox_body.setSingleStep(5)
         self.spinBox_body.setProperty("value", 100)
-        self.spinBox_body.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
         self.gridLayout.addWidget(self.spinBox_body, 3, 1, 1, 1)
 
         self.Slider_body = QtWidgets.QSlider(parent=self.formLayoutWidget)
@@ -167,124 +170,185 @@ class IndicatorSetup_Form(object):
         self.gridLayout.addWidget(self.checkBox_color, 4, 0, 1, 1)
 
         # RSI AVG CHG
-        self.checkBox_rsiavgchg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_rsiavgchg.setText("Change of RSI AVERAGE")
-        self.gridLayout.addWidget(self.checkBox_rsiavgchg, 5, 0, 1, 1)
+        self.checkBox_RSIavgchg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_RSIavgchg.setText("Change of RSI AVERAGE")
+        self.gridLayout.addWidget(self.checkBox_RSIavgchg, 5, 0, 1, 1)
         
-        self.spinBox_rsiavgchg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
-        self.spinBox_rsiavgchg.setFrame(False)
-        self.spinBox_rsiavgchg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.spinBox_rsiavgchg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
-        self.spinBox_rsiavgchg.setMaximum(200)
-        self.spinBox_rsiavgchg.setSingleStep(5)
-        self.spinBox_rsiavgchg.setProperty("value", 100)
-        self.spinBox_rsiavgchg.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
-        self.gridLayout.addWidget(self.spinBox_rsiavgchg, 5, 1, 1, 1)
+        self.spinBox_RSIavgchg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
+        self.spinBox_RSIavgchg.setFrame(False)
+        self.spinBox_RSIavgchg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.spinBox_RSIavgchg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.spinBox_RSIavgchg.setMaximum(200)
+        self.spinBox_RSIavgchg.setSingleStep(5)
+        self.spinBox_RSIavgchg.setProperty("value", 100)
+        self.gridLayout.addWidget(self.spinBox_RSIavgchg, 5, 1, 1, 1)
 
-        self.Slider_rsiavgchg = QtWidgets.QSlider(parent=self.formLayoutWidget)
-        self.Slider_rsiavgchg.setMaximum(200)
-        self.Slider_rsiavgchg.setSingleStep(5)
-        self.Slider_rsiavgchg.setPageStep(5)
-        self.Slider_rsiavgchg.setSliderPosition(100)
-        self.Slider_rsiavgchg.setTracking(True)
-        self.Slider_rsiavgchg.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.Slider_rsiavgchg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
-        self.Slider_rsiavgchg.setTickInterval(5)
-        self.gridLayout.addWidget(self.Slider_rsiavgchg, 5, 2, 1, 1)
+        self.Slider_RSIavgchg = QtWidgets.QSlider(parent=self.formLayoutWidget)
+        self.Slider_RSIavgchg.setMaximum(200)
+        self.Slider_RSIavgchg.setSingleStep(5)
+        self.Slider_RSIavgchg.setPageStep(5)
+        self.Slider_RSIavgchg.setSliderPosition(100)
+        self.Slider_RSIavgchg.setTracking(True)
+        self.Slider_RSIavgchg.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.Slider_RSIavgchg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
+        self.Slider_RSIavgchg.setTickInterval(5)
+        self.gridLayout.addWidget(self.Slider_RSIavgchg, 5, 2, 1, 1)
 
         # RSI STATE
-        self.checkBox_rsistate = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_rsistate.setText("RSI STATE (overb./overs.) of last candle")
-        self.gridLayout.addWidget(self.checkBox_rsistate, 6, 0, 1, 1)
+        self.checkBox_RSIstate = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_RSIstate.setText("RSI STATE (overb./overs.) of last candle")
+        self.gridLayout.addWidget(self.checkBox_RSIstate, 6, 0, 1, 1)
 
         # MACD HIST CHG
-        self.checkBox_macdhistchg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_macdhistchg.setText("Change of MACD HISTOGRAM")
-        self.gridLayout.addWidget(self.checkBox_macdhistchg, 7, 0, 1, 1)
+        self.checkBox_MACDhistchg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_MACDhistchg.setText("Change of MACD HISTOGRAM")
+        self.gridLayout.addWidget(self.checkBox_MACDhistchg, 7, 0, 1, 1)
 
-        self.spinBox_macdhistchg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
-        self.spinBox_macdhistchg.setFrame(False)
-        self.spinBox_macdhistchg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.spinBox_macdhistchg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
-        self.spinBox_macdhistchg.setMaximum(200)
-        self.spinBox_macdhistchg.setSingleStep(5)
-        self.spinBox_macdhistchg.setProperty("value", 100)
-        self.spinBox_macdhistchg.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
-        self.gridLayout.addWidget(self.spinBox_macdhistchg, 7, 1, 1, 1)
+        self.spinBox_MACDhistchg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
+        self.spinBox_MACDhistchg.setFrame(False)
+        self.spinBox_MACDhistchg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.spinBox_MACDhistchg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.spinBox_MACDhistchg.setMaximum(200)
+        self.spinBox_MACDhistchg.setSingleStep(5)
+        self.spinBox_MACDhistchg.setProperty("value", 100)
+        self.gridLayout.addWidget(self.spinBox_MACDhistchg, 7, 1, 1, 1)
 
-        self.Slider_macdhistchg = QtWidgets.QSlider(parent=self.formLayoutWidget)
-        self.Slider_macdhistchg.setMaximum(200)
-        self.Slider_macdhistchg.setSingleStep(5)
-        self.Slider_macdhistchg.setPageStep(5)
-        self.Slider_macdhistchg.setSliderPosition(100)
-        self.Slider_macdhistchg.setTracking(True)
-        self.Slider_macdhistchg.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.Slider_macdhistchg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
-        self.Slider_macdhistchg.setTickInterval(5)
-        self.gridLayout.addWidget(self.Slider_macdhistchg, 7, 2, 1, 1)
+        self.Slider_MACDhistchg = QtWidgets.QSlider(parent=self.formLayoutWidget)
+        self.Slider_MACDhistchg.setMaximum(200)
+        self.Slider_MACDhistchg.setSingleStep(5)
+        self.Slider_MACDhistchg.setPageStep(5)
+        self.Slider_MACDhistchg.setSliderPosition(100)
+        self.Slider_MACDhistchg.setTracking(True)
+        self.Slider_MACDhistchg.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.Slider_MACDhistchg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
+        self.Slider_MACDhistchg.setTickInterval(5)
+        self.gridLayout.addWidget(self.Slider_MACDhistchg, 7, 2, 1, 1)
 
         # MACD RANGE
-        self.checkBox_macdrange = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_macdrange.setText("RANGE (+/-) of MACD of last candle")
-        self.gridLayout.addWidget(self.checkBox_macdrange, 8, 0, 1, 1)
+        self.checkBox_MACDrange = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_MACDrange.setText("RANGE (+/-) of MACD of last candle")
+        self.gridLayout.addWidget(self.checkBox_MACDrange, 8, 0, 1, 1)
 
         # SMA20 CHG
-        self.checkBox_sma20chg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_sma20chg.setText("Change of SMA20")
-        self.gridLayout.addWidget(self.checkBox_sma20chg, 9, 0, 1, 1)
+        self.checkBox_SMA20chg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_SMA20chg.setText("Change of SMA20")
+        self.gridLayout.addWidget(self.checkBox_SMA20chg, 9, 0, 1, 1)
 
-        self.spinBox_sma20chg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
-        self.spinBox_sma20chg.setFrame(False)
-        self.spinBox_sma20chg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.spinBox_sma20chg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
-        self.spinBox_sma20chg.setMaximum(200)
-        self.spinBox_sma20chg.setSingleStep(5)
-        self.spinBox_sma20chg.setProperty("value", 100)
-        self.spinBox_sma20chg.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
-        self.gridLayout.addWidget(self.spinBox_sma20chg, 9, 1, 1, 1)
+        self.spinBox_SMA20chg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
+        self.spinBox_SMA20chg.setFrame(False)
+        self.spinBox_SMA20chg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.spinBox_SMA20chg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.spinBox_SMA20chg.setMaximum(200)
+        self.spinBox_SMA20chg.setSingleStep(5)
+        self.spinBox_SMA20chg.setProperty("value", 100)
+        self.gridLayout.addWidget(self.spinBox_SMA20chg, 9, 1, 1, 1)
 
-        self.Slider_sma20chg = QtWidgets.QSlider(parent=self.formLayoutWidget)
-        self.Slider_sma20chg.setMaximum(200)
-        self.Slider_sma20chg.setSingleStep(5)
-        self.Slider_sma20chg.setPageStep(5)
-        self.Slider_sma20chg.setSliderPosition(100)
-        self.Slider_sma20chg.setTracking(True)
-        self.Slider_sma20chg.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.Slider_sma20chg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
-        self.Slider_sma20chg.setTickInterval(5)
-        self.gridLayout.addWidget(self.Slider_sma20chg, 9, 2, 1, 1)
+        self.Slider_SMA20chg = QtWidgets.QSlider(parent=self.formLayoutWidget)
+        self.Slider_SMA20chg.setMaximum(200)
+        self.Slider_SMA20chg.setSingleStep(5)
+        self.Slider_SMA20chg.setPageStep(5)
+        self.Slider_SMA20chg.setSliderPosition(100)
+        self.Slider_SMA20chg.setTracking(True)
+        self.Slider_SMA20chg.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.Slider_SMA20chg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
+        self.Slider_SMA20chg.setTickInterval(5)
+        self.gridLayout.addWidget(self.Slider_SMA20chg, 9, 2, 1, 1)
 
         # SMA50 CHG
-        self.checkBox_sma50chg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_sma50chg.setText("Change of SMA50")
-        self.gridLayout.addWidget(self.checkBox_sma50chg, 10, 0, 1, 1)
+        self.checkBox_SMA50chg = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_SMA50chg.setText("Change of SMA50")
+        self.gridLayout.addWidget(self.checkBox_SMA50chg, 10, 0, 1, 1)
 
-        self.spinBox_sma50chg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
-        self.spinBox_sma50chg.setFrame(False)
-        self.spinBox_sma50chg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.spinBox_sma50chg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
-        self.spinBox_sma50chg.setMaximum(200)
-        self.spinBox_sma50chg.setSingleStep(5)
-        self.spinBox_sma50chg.setProperty("value", 100)
-        self.spinBox_sma50chg.setStyleSheet("""QSpinBox:disabled {color: lightgrey;}""")
-        self.spinBox_sma50chg.setMinimumWidth(42)
-        self.gridLayout.addWidget(self.spinBox_sma50chg, 10, 1, 1, 1)
+        self.spinBox_SMA50chg = QtWidgets.QSpinBox(parent=self.formLayoutWidget)
+        self.spinBox_SMA50chg.setFrame(False)
+        self.spinBox_SMA50chg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.spinBox_SMA50chg.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.spinBox_SMA50chg.setMaximum(200)
+        self.spinBox_SMA50chg.setSingleStep(5)
+        self.spinBox_SMA50chg.setProperty("value", 100)
+        self.spinBox_SMA50chg.setMinimumWidth(42)
+        self.gridLayout.addWidget(self.spinBox_SMA50chg, 10, 1, 1, 1)
        
-        self.Slider_sma50chg = QtWidgets.QSlider(parent=self.formLayoutWidget)
-        self.Slider_sma50chg.setMaximum(200)
-        self.Slider_sma50chg.setSingleStep(5)
-        self.Slider_sma50chg.setPageStep(5)
-        self.Slider_sma50chg.setSliderPosition(100)
-        self.Slider_sma50chg.setTracking(True)
-        self.Slider_sma50chg.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.Slider_sma50chg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
-        self.Slider_sma50chg.setTickInterval(5)
-        self.gridLayout.addWidget(self.Slider_sma50chg, 10, 2, 1, 1)
+        self.Slider_SMA50chg = QtWidgets.QSlider(parent=self.formLayoutWidget)
+        self.Slider_SMA50chg.setMaximum(200)
+        self.Slider_SMA50chg.setSingleStep(5)
+        self.Slider_SMA50chg.setPageStep(5)
+        self.Slider_SMA50chg.setSliderPosition(100)
+        self.Slider_SMA50chg.setTracking(True)
+        self.Slider_SMA50chg.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.Slider_SMA50chg.setTickPosition(QtWidgets.QSlider.TickPosition.NoTicks)
+        self.Slider_SMA50chg.setTickInterval(5)
+        self.gridLayout.addWidget(self.Slider_SMA50chg, 10, 2, 1, 1)
         
         # SMA 20/50 RELATION
-        self.checkBox_sma20_50relation = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
-        self.checkBox_sma20_50relation.setText("Relation of SMA20 and SMA50 (last candle)")
-        self.gridLayout.addWidget(self.checkBox_sma20_50relation, 11, 0, 1, 1)
+        self.checkBox_SMA20_50relation = QtWidgets.QCheckBox(parent=self.formLayoutWidget)
+        self.checkBox_SMA20_50relation.setText("Relation of SMA20 and SMA50 (last candle)")
+        self.gridLayout.addWidget(self.checkBox_SMA20_50relation, 11, 0, 1, 1)
+
+        # BUTTONS
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=Form)
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(10, 450, 331, 41))
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.horizontalLayoutWidget_2.setStyleSheet("""
+            QPushButton {
+                background-color: rgb(76, 172, 207);
+                border: 1px solid #4c7a9b;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: rgb(56, 152, 187);
+            }
+        """)
+
+        self.pushButton_indicator_save = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
+        self.pushButton_indicator_save.setText("Save")
+        self.horizontalLayout_2.addWidget(self.pushButton_indicator_save)
+        self.pushButton_indicator_save.setEnabled(False)
+        self.pushButton_indicator_save.clicked.connect(self.get_indicator_setup)
+
+        self.pushButton_indicator_saveas = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
+        self.pushButton_indicator_saveas.setText("Save as ...")
+        self.pushButton_indicator_saveas.setEnabled(False)
+        self.horizontalLayout_2.addWidget(self.pushButton_indicator_saveas)
+
+        self.pushButton_indicator_reset = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
+        self.pushButton_indicator_reset.setText("Reset")
+        self.pushButton_indicator_reset.setEnabled(False)
+        self.horizontalLayout_2.addWidget(self.pushButton_indicator_reset)
+
+        self.indicator_widgets = [
+            {'checkbox' : self.checkBox_low, 'spinbox' : self.spinBox_low, 'name' : 'lowchg'},
+            {'checkbox' : self.checkBox_open, 'spinbox' : self.spinBox_open, 'name' : 'openchg'},
+            {'checkbox' : self.checkBox_high, 'spinbox' : self.spinBox_high, 'name' : 'highchg'},
+            {'checkbox' : self.checkBox_body, 'spinbox' : self.spinBox_body, 'name' : 'body'},
+            {'checkbox' : self.checkBox_color, 'spinbox' : False, 'name' : 'color'},
+            {'checkbox' : self.checkBox_RSIavgchg, 'spinbox' : self.spinBox_RSIavgchg, 'name' : 'RSIavgchg'},
+            {'checkbox' : self.checkBox_RSIstate, 'spinbox' : False, 'name' : 'RSIstate'},
+            {'checkbox' : self.checkBox_MACDhistchg, 'spinbox' : self.spinBox_MACDhistchg, 'name' : 'MACDhistchg'},
+            {'checkbox' : self.checkBox_MACDrange, 'spinbox' : False, 'name' : 'MACDrange'},
+            {'checkbox' : self.checkBox_SMA20chg, 'spinbox' : self.spinBox_SMA20chg, 'name' : 'SMA20chg'},
+            {'checkbox' : self.checkBox_SMA50chg, 'spinbox' : self.spinBox_SMA50chg, 'name' : 'SMA50chg'},
+            {'checkbox' : self.checkBox_SMA20_50relation, 'spinbox' : False, 'name' : 'SMA20_50relation'}
+        ]
+
+        for checkbox in self.indicator_widgets:
+            checkbox['checkbox'].stateChanged.connect(self.manage_buttons)
+    
+    def manage_buttons(self):
+        one_is_checked = False
+        for checkbox in self.indicator_widgets:
+            if checkbox['checkbox'].isChecked():
+                self.pushButton_indicator_save.setEnabled(True)
+                self.pushButton_indicator_saveas.setEnabled(True)
+                self.pushButton_indicator_reset.setEnabled(True)
+                one_is_checked = True
+                break
+        
+        if one_is_checked == False:
+                self.pushButton_indicator_save.setEnabled(False)
+                self.pushButton_indicator_saveas.setEnabled(False)
+                self.pushButton_indicator_reset.setEnabled(False)
 
     def reset_indicators(self):
         
@@ -303,14 +367,14 @@ class IndicatorSetup_Form(object):
 
         sliders = [
             self.Slider_low, self.Slider_open, self.Slider_high,
-            self.Slider_body, self.Slider_rsiavgchg, self.Slider_macdhistchg,
-            self.Slider_sma20chg, self.Slider_sma50chg
+            self.Slider_body, self.Slider_RSIavgchg, self.Slider_MACDhistchg,
+            self.Slider_SMA20chg, self.Slider_SMA50chg
         ]
         
         spinboxes = [
             self.spinBox_low, self.spinBox_open, self.spinBox_high,
-            self.spinBox_body, self.spinBox_rsiavgchg, self.spinBox_macdhistchg,
-            self.spinBox_sma20chg, self.spinBox_sma50chg
+            self.spinBox_body, self.spinBox_RSIavgchg, self.spinBox_MACDhistchg,
+            self.spinBox_SMA20chg, self.spinBox_SMA50chg
         ]
         
         for slider, spinbox in zip(sliders, spinboxes):
@@ -319,8 +383,8 @@ class IndicatorSetup_Form(object):
         
         checkboxes_with_sliders = [
             self.checkBox_low, self.checkBox_open, self.checkBox_high,
-            self.checkBox_body, self.checkBox_rsiavgchg, self.checkBox_macdhistchg,
-            self.checkBox_sma20chg, self.checkBox_sma50chg
+            self.checkBox_body, self.checkBox_RSIavgchg, self.checkBox_MACDhistchg,
+            self.checkBox_SMA20chg, self.checkBox_SMA50chg
         ]
         
         for checkbox, slider, spinbox in zip(checkboxes_with_sliders, sliders, spinboxes):
@@ -331,6 +395,36 @@ class IndicatorSetup_Form(object):
 
         for checkbox, slider, spinbox in zip(checkboxes_with_sliders, sliders, spinboxes):
             slider.valueChanged.connect(lambda _, cb=checkbox, sl=slider, sp=spinbox: harmonize_spinboxes(cb, sl, sp))
+
+    def get_indicator_setup(self):
+        result = {
+            'name' : '',
+            'days' : [False, False],
+            'lowchg' : [False, False],
+            'openchg' : [False, False],
+            'highchg' : [False, False],
+            'body' : [False, False],
+            'color' : [False, False],
+            'RSIavgchg' : [False, False],
+            'RSIstate' : [False, False],
+            'MACDhistchg' : [False, False],
+            'MACDrange' : [False, False],
+            'SMA20chg' : [False, False],
+            'SMA50chg' : [False, False],
+            'SMA20_50relation' : [False, False]
+        }
+        
+        result['days'][0] = True
+        result['days'][1] = self.spinbox_days.value()
+
+        for widget in self.indicator_widgets:
+            if widget['checkbox'].isChecked():
+                result[widget['name']][0] = True
+                if widget['spinbox'] != False:
+                    result[widget['name']][1] = widget['spinbox'].value()
+        
+        print(result)
+        return result
 
 if __name__ == "__main__":
     import sys

@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     ui.list_of_tickersWidget.itemSelectionChanged.connect(on_ticker_selection_changed)
     
-    # --- manage SETUP SELECTION
+    # --- manage INDICATOR SETUP SELECTION
     def on_setup_selection_changed():
         selected_item = ui.list_of_setupWidget.selectedItems()
         parameters.indicator_setup = selected_item[0].text()

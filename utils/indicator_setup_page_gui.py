@@ -285,6 +285,8 @@ class IndicatorSetup_Form(object):
         self.checkBox_SMA20_50relation.setText("Relation of SMA20 and SMA50 (last candle)")
         self.gridLayout.addWidget(self.checkBox_SMA20_50relation, 11, 0, 1, 1)
 
+        self.harmonize_indicator_widgets()
+
         # BUTTONS
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=Form)
         self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(10, 450, 331, 41))
@@ -305,17 +307,16 @@ class IndicatorSetup_Form(object):
         self.pushButton_indicator_save.setText("Save")
         self.horizontalLayout_2.addWidget(self.pushButton_indicator_save)
         self.pushButton_indicator_save.setEnabled(False)
-        self.pushButton_indicator_save.clicked.connect(self.get_indicator_setup)
 
         self.pushButton_indicator_saveas = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
         self.pushButton_indicator_saveas.setText("Save as ...")
-        self.pushButton_indicator_saveas.setEnabled(False)
         self.horizontalLayout_2.addWidget(self.pushButton_indicator_saveas)
-
+        self.pushButton_indicator_saveas.setEnabled(False)
+        
         self.pushButton_indicator_reset = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
         self.pushButton_indicator_reset.setText("Reset")
-        self.pushButton_indicator_reset.setEnabled(False)
         self.horizontalLayout_2.addWidget(self.pushButton_indicator_reset)
+        self.pushButton_indicator_reset.setEnabled(False)
 
         self.indicator_widgets = [
             {'checkbox' : self.checkBox_low, 'spinbox' : self.spinBox_low, 'name' : 'lowchg'},
@@ -350,7 +351,15 @@ class IndicatorSetup_Form(object):
                 self.pushButton_indicator_saveas.setEnabled(False)
                 self.pushButton_indicator_reset.setEnabled(False)
 
-    def reset_indicators(self):
+    def reset_indicator_widgets(self):
+        for widget in self.indicator_widgets:
+            widget['checkbox'].setChecked(False)
+            if widget['spinbox'] != False:
+                widget['spinbox'].setValue(100)
+        
+        self.spinbox_days.setValue(3)
+
+    def harmonize_indicator_widgets(self):
         
         def set_status_of_sliders(checkbox, slider, spinbox):
             status = checkbox.isChecked()
@@ -399,32 +408,41 @@ class IndicatorSetup_Form(object):
     def get_indicator_setup(self):
         result = {
             'name' : '',
-            'days' : [False, False],
-            'lowchg' : [False, False],
-            'openchg' : [False, False],
-            'highchg' : [False, False],
-            'body' : [False, False],
-            'color' : [False, False],
-            'RSIavgchg' : [False, False],
-            'RSIstate' : [False, False],
-            'MACDhistchg' : [False, False],
-            'MACDrange' : [False, False],
-            'SMA20chg' : [False, False],
-            'SMA50chg' : [False, False],
-            'SMA20_50relation' : [False, False]
+            'days' : '',
+            'lowchg' : {'selected' : False, 'tolerance': 100},
+            'openchg' : {'selected' : False, 'tolerance': 100},
+            'highchg' : {'selected' : False, 'tolerance': 100},
+            'body' : {'selected' : False, 'tolerance': 100},
+            'color' : {'selected' : False, 'tolerance': False},
+            'RSIavgchg' : {'selected' : False, 'tolerance': 100},
+            'RSIstate' : {'selected' : False, 'tolerance': False},
+            'MACDhistchg' : {'selected' : False, 'tolerance': 100},
+            'MACDrange' : {'selected' : False, 'tolerance': False},
+            'SMA20chg' : {'selected' : False, 'tolerance': 100},
+            'SMA50chg' : {'selected' : False, 'tolerance': 100},
+            'SMA20_50relation' : {'selected' : False, 'tolerance': False}
         }
         
-        result['days'][0] = True
-        result['days'][1] = self.spinbox_days.value()
+        result['days'] = self.spinbox_days.value()
 
         for widget in self.indicator_widgets:
             if widget['checkbox'].isChecked():
-                result[widget['name']][0] = True
+                result[widget['name']]['selected'] = True
                 if widget['spinbox'] != False:
-                    result[widget['name']][1] = widget['spinbox'].value()
-        
-        print(result)
+                    result[widget['name']]['tolerance'] = widget['spinbox'].value()
         return result
+
+    def set_indicator_setup_on_screen(self, setup: dict):
+        self.reset_indicator_widgets()
+        self.spinbox_days.setValue(setup['days'])
+        for widget in self.indicator_widgets:
+            if setup[widget['name']]['selected']:
+                widget['checkbox'].setEnabled(True)
+                widget['checkbox'].setChecked(True)
+                if widget['spinbox']:
+                    widget['spinbox'].setEnabled(True)
+                    widget['spinbox'].setValue(setup[widget['name']]['tolerance'])
+
 
 if __name__ == "__main__":
     import sys
@@ -433,8 +451,5 @@ if __name__ == "__main__":
     ui = IndicatorSetup_Form()
     ui.setupUi(Form)
     Form.show()
-
-    ui.reset_indicators()
-
-
+    ui.harmonize_indicator_widgets()
     sys.exit(app.exec())

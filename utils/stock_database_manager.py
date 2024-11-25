@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 import pandas as pd
 
-def check_database_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> bool:
+def check_stock_database_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> bool:
     """
     :Check the existence of mongodb database
     
@@ -18,10 +18,10 @@ def check_database_in_mongodb(client = "mongodb://localhost:27017", database = '
 
     return True
 
-def initial_upload_of_database(client = "mongodb://localhost:27017", database = 'Stock_data'):
+def initial_upload_of_stock_database(client = "mongodb://localhost:27017", database = 'Stock_data'):
     from .data_downloader import download_from_yahoofin, add_indicator
     """
-    :Check the existence of mongodb database
+    :Creates Stock_data database and uploads ^GSPC, ^GDAXI, ^IXIC data
     
     :Parameters:
         client : MongoDB client
@@ -34,9 +34,9 @@ def initial_upload_of_database(client = "mongodb://localhost:27017", database = 
     for item in tickers:
         stock_df = download_from_yahoofin(ticker=item, period='max')
         stock_df = add_indicator(stock_df, indicator='all')
-        write_data_to_mongodb(stock_df, coll=item)
+        write_stock_data_to_mongodb(stock_df, coll=item)
 
-def check_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC') -> bool:
+def check_stock_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC') -> bool:
     """
     :Check the existence of mongodb database/collection
     
@@ -60,7 +60,7 @@ def check_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stoc
     cursor = mongodb_coll.find().sort({'Date':-1})
     return True, cursor.next()['Date']
 
-def get_collections_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> list:
+def get_stock_collections_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data') -> list:
     """
     :Returns the existing collections in MongoDB
     
@@ -78,7 +78,7 @@ def get_collections_from_mongodb(client = "mongodb://localhost:27017", database 
     mongodb_database = mongodb_client[f'{database}']
     return mongodb_database.list_collection_names()
 
-def write_data_to_mongodb(stock_df: pd.DataFrame, client = "mongodb://localhost:27017", database = 'Stock_data',
+def write_stock_data_to_mongodb(stock_df: pd.DataFrame, client = "mongodb://localhost:27017", database = 'Stock_data',
                           coll = '^GSPC', replace = True):
     """
     :Writes data to MongoDB (overwrite or append).
@@ -127,7 +127,7 @@ def get_first_correct_date(client = "mongodb://localhost:27017", database = 'Sto
             return index, item['Date']
     return False
 
-def get_data_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC', range = 'all') -> pd.DataFrame:
+def get_stock_data_from_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC', range = 'all') -> pd.DataFrame:
     """
     :Loads all data from MongoDB collection.
     

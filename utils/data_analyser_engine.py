@@ -2,9 +2,9 @@ import pandas as pd
 
 if __name__ != '__main__':
     try:
-        from .database_manager import get_candles_from_df
+        from utils.stock_database_manager import get_candles_from_df
     except:
-        from database_manager import get_candles_from_df
+        from stock_database_manager import get_candles_from_df
 
 class AnalyserEngine:
 
@@ -345,9 +345,9 @@ class AnalyserEngine:
         self.next_day_chg_dict = {'Lowchg': lowchg_list, 'Highchg': highchg_list}
 
 if __name__ == '__main__':
-    from database_manager import get_data_from_mongodb, get_candles_from_df
+    from stock_database_manager import get_stock_data_from_mongodb, get_candles_from_df
 
-    stock_df = get_data_from_mongodb()
+    stock_df = get_stock_data_from_mongodb()
     print(f'{stock_df}\n')
 
     candles = get_candles_from_df(stock_df, date='2024-05-30', period=3)

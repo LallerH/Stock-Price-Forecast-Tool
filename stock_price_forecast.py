@@ -3,9 +3,11 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
-from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_collections_from_mongodb,\
+from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_stock_collections_from_mongodb,\
                   Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets,\
-                  check_database_in_mongodb, initial_upload_of_database
+                  check_stock_database_in_mongodb, initial_upload_of_stock_database, write_indicator_setup,\
+                  initialize_indicator_setup_database, check_indicator_setup_database, input_text, get_indicator_setups_from_mongodb,\
+                  load_indicator_setup
 
 if __name__ == '__main__':
 
@@ -22,23 +24,23 @@ if __name__ == '__main__':
         setbutton()
         setdates()
 
-    if not check_database_in_mongodb(database = 'Stock_data'):
+    if not check_stock_database_in_mongodb(database = 'Stock_data'):
         show_message('Click to start the initial setup of database!')
         print('Downloading...')
         try:
-            initial_upload_of_database(database = 'Stock_data')
+            initial_upload_of_stock_database(database = 'Stock_data')
             show_message('Initial setup of database succeded!\nInitial download of S&P, DAX and NASDAQ indexes succeeded!')
         except:
             show_message('Initial setup of database was not succeeded!\nRequired:\n- database manager MongoDB (mongodb://localhost:27017)\n- internet connection')
             sys.exit(app.exec())
 
-    if get_collections_from_mongodb():
-        list_of_tickers = sorted(get_collections_from_mongodb())
+    if get_stock_collections_from_mongodb():
+        list_of_tickers = sorted(get_stock_collections_from_mongodb())
         ui.list_of_tickersWidget.addItems(list_of_tickers)
     else:
         print('Downloading...')
         try:
-            initial_upload_of_database(database = 'Stock_data')
+            initial_upload_of_stock_database(database = 'Stock_data')
             show_message('Initial setup of database succeded!\nInitial download of S&P, DAX and NASDAQ indexes succeeded!')
         except:
             show_message('Initial setup of database was not succeeded!\nRequired:\n- database manager MongoDB (mongodb://localhost:27017)\n- internet connection')
@@ -49,19 +51,35 @@ if __name__ == '__main__':
     # --- manage INDICATOR SETUP SELECTION
     def on_setup_selection_changed():
         selected_item = ui.list_of_setupWidget.selectedItems()
-        parameters.indicator_setup = selected_item[0].text()
+        parameters.indicator_setup = load_indicator_setup(selected_item[0].text())
+        indicator_form.set_indicator_setup_on_screen(parameters.indicator_setup)
 
-    ui.list_of_setupWidget.addItem('Base setup')
+    def save_to_mongodb():
+        text = input_text()
+        if text != None:
+            setup = indicator_form.get_indicator_setup()
+            setup['name'] = text
+            write_indicator_setup(setup)
 
-    ui.list_of_setupWidget.itemSelectionChanged.connect(on_setup_selection_changed)
-    ui.list_of_setupWidget.setCurrentRow(0)
+    if check_indicator_setup_database() == False:
+        initialize_indicator_setup_database()
+
+    list_of_indicator_setups = get_indicator_setups_from_mongodb()
+    ui.list_of_setupWidget.addItems(list_of_indicator_setups)
 
     indicators = QtWidgets.QWidget()
     indicator_form = IndicatorSetup_Form()
     indicator_form.setupUi(indicators)
     ui.indicator_layout.addWidget(indicators)
+    
+    ui.list_of_setupWidget.setCurrentRow(0)
+    selected_item = ui.list_of_setupWidget.selectedItems()
+    parameters.indicator_setup = load_indicator_setup(selected_item[0].text())
+    indicator_form.set_indicator_setup_on_screen(parameters.indicator_setup)
+    ui.list_of_setupWidget.itemSelectionChanged.connect(on_setup_selection_changed)
 
-    indicator_form.reset_indicators()
+    indicator_form.pushButton_indicator_reset.clicked.connect(indicator_form.reset_indicator_widgets)
+    indicator_form.pushButton_indicator_save.clicked.connect(save_to_mongodb)
 
     # --- manage DATE SELECTION
     def setdates():

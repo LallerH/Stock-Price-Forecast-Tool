@@ -402,7 +402,18 @@ def show_message(text):
     message_box.setIcon(QtWidgets.QMessageBox.Icon.Information)
     message_box.setWindowTitle("Information")
     message_box.setText(text)
-    message_box.exec()           
+    message_box.exec()
+
+def input_text():
+    dialog = QtWidgets.QInputDialog()
+    dialog.setWindowTitle('Save')
+    dialog.setLabelText('Input setup name:')    
+    dialog.setWindowIcon(QIcon('ikon.ico'))
+    
+    ok = dialog.exec()
+    if ok:
+        return dialog.textValue()
+    return None
 
 def hide_widgets(layout):
     for i in range(layout.count() - 1, -1, -1):
@@ -419,4 +430,5 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+    input_text()
     sys.exit(app.exec())

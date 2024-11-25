@@ -4,12 +4,12 @@ from PyQt6.QtCore import QDate
 if __name__ != '__main__':
     from utils import download_from_yahoofin,\
                     add_indicator,\
-                    write_data_to_mongodb,\
-                    get_data_from_mongodb,\
+                    write_stock_data_to_mongodb,\
+                    get_stock_data_from_mongodb,\
                     get_candles_from_df,\
                     get_index_from_df,\
                     AnalyserEngine,\
-                    check_data_in_mongodb,\
+                    check_stock_data_in_mongodb,\
                     get_first_correct_date
 
 def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-01-01', last_base_date = '2024-10-18', chartwithfact=True):
@@ -44,20 +44,20 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
     if ticker not in ticker_name:
         ticker_name.update({ticker: ticker})
 
-    db_exists = check_data_in_mongodb(coll=ticker)
+    db_exists = check_stock_data_in_mongodb(coll=ticker)
     if db_exists[0] == False:
         stock_df = download_from_yahoofin(ticker=ticker, period='max')
         stock_df = add_indicator(stock_df, indicator='all')
-        write_data_to_mongodb(stock_df, coll=ticker)
+        write_stock_data_to_mongodb(stock_df, coll=ticker)
         print(f'{stock_df}\n')
     else:
         stock_df_expasion = download_from_yahoofin(ticker=ticker, start=db_exists[1])
-        stock_df = get_data_from_mongodb(coll= ticker, range='last')
+        stock_df = get_stock_data_from_mongodb(coll= ticker, range='last')
         stock_df = pd.concat([stock_df, stock_df_expasion], axis=0, ignore_index=True)
         stock_df = add_indicator(stock_df, indicator='all')
-        write_data_to_mongodb(stock_df, coll=ticker, replace=False)
+        write_stock_data_to_mongodb(stock_df, coll=ticker, replace=False)
 
-    stock_df = get_data_from_mongodb(coll=ticker)
+    stock_df = get_stock_data_from_mongodb(coll=ticker)
     print(f'{stock_df}\n')
 
     candles = get_candles_from_df(stock_df, date=last_base_date, period=compared_period+1)
@@ -132,8 +132,8 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
 
 if __name__ == '__main__':
     from data_downloader import download_from_yahoofin, add_indicator
-    from database_manager import get_data_from_mongodb, write_data_to_mongodb, get_candles_from_df,\
-                                check_data_in_mongodb, get_index_from_df, get_first_correct_date
+    from stock_database_manager import get_stock_data_from_mongodb, write_stock_data_to_mongodb, get_candles_from_df,\
+                                check_stock_data_in_mongodb, get_index_from_df, get_first_correct_date
     from data_analyser_engine import AnalyserEngine
     from chart_generator import show_histogram, show_candle_chart, show_all_charts
     main_engine()

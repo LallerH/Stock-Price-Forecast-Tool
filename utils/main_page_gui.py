@@ -409,11 +409,30 @@ def input_text():
     dialog.setWindowTitle('Save')
     dialog.setLabelText('Input setup name:')    
     dialog.setWindowIcon(QIcon('ikon.ico'))
-    
+    dialog.setStyleSheet("""
+        QLineEdit {
+            border: 1px solid grey;
+            border-radius: 1px;
+            padding: 2px;
+        }
+        QDialogButtonBox QPushButton {
+            background-color: rgb(76, 172, 207);
+            border: 1px solid #4c7a9b;
+            border-radius: 5px;
+            padding: 5px;
+            min-width: 75px;
+            height: 10px;
+            color: black;
+        }
+        QDialogButtonBox QPushButton:hover {
+            background-color: rgb(56, 152, 187);
+            color: black;
+        }
+    """)
     ok = dialog.exec()
     if ok:
-        return dialog.textValue()
-    return None
+        return ok, dialog.textValue()
+    return ok, False
 
 def hide_widgets(layout):
     for i in range(layout.count() - 1, -1, -1):

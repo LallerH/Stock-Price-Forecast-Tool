@@ -1,6 +1,6 @@
 import sys
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, Qt
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
 from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_stock_collections_from_mongodb,\
@@ -35,7 +35,7 @@ if __name__ == '__main__':
             sys.exit(app.exec())
 
     if get_stock_collections_from_mongodb():
-        list_of_tickers = sorted(get_stock_collections_from_mongodb())
+        list_of_tickers = sorted(get_stock_collections_from_mongodb(), key=str.casefold)
         ui.list_of_tickersWidget.addItems(list_of_tickers)
     else:
         print('Downloading...')
@@ -51,20 +51,37 @@ if __name__ == '__main__':
     # --- manage INDICATOR SETUP SELECTION
     def on_setup_selection_changed():
         selected_item = ui.list_of_setupWidget.selectedItems()
-        parameters.indicator_setup = load_indicator_setup(selected_item[0].text())
-        indicator_form.set_indicator_setup_on_screen(parameters.indicator_setup)
+        if selected_item:
+            parameters.indicator_setup = load_indicator_setup(selected_item[0].text())
+            indicator_form.set_indicator_setup_on_screen(parameters.indicator_setup)
 
-    def save_to_mongodb():
-        text = input_text()
-        if text != None:
+    def clear_selection():
+        ui.list_of_setupWidget.itemSelectionChanged.disconnect()
+        ui.list_of_setupWidget.clearSelection()
+        ui.list_of_setupWidget.setCurrentRow(-1)
+        ui.list_of_setupWidget.itemSelectionChanged.connect(on_setup_selection_changed)
+
+    def saveas_to_mongodb():
+        status, text = input_text()
+        if status == 1 and text != '':
             setup = indicator_form.get_indicator_setup()
             setup['name'] = text
             write_indicator_setup(setup)
+            list_of_indicator_setups = sorted(get_indicator_setups_from_mongodb(), key=str.casefold)
+            ui.list_of_setupWidget.clear()
+            ui.list_of_setupWidget.addItems(list_of_indicator_setups)
+            items = ui.list_of_setupWidget.findItems(text, Qt.MatchFlag.MatchExactly)
+            ui.list_of_setupWidget.setCurrentItem(items[0])
+        elif status == 1 and text == '':
+            show_message('No SETUP NAME was given, setup was not saved!')
+
+    def overwrite_in_mongodb():
+        ...
 
     if check_indicator_setup_database() == False:
         initialize_indicator_setup_database()
 
-    list_of_indicator_setups = get_indicator_setups_from_mongodb()
+    list_of_indicator_setups = sorted(get_indicator_setups_from_mongodb(), key=str.casefold)
     ui.list_of_setupWidget.addItems(list_of_indicator_setups)
 
     indicators = QtWidgets.QWidget()
@@ -79,9 +96,11 @@ if __name__ == '__main__':
     ui.list_of_setupWidget.itemSelectionChanged.connect(on_setup_selection_changed)
 
     indicator_form.pushButton_indicator_reset.clicked.connect(indicator_form.reset_indicator_widgets)
-    indicator_form.pushButton_indicator_save.clicked.connect(save_to_mongodb)
+    indicator_form.pushButton_indicator_reset.clicked.connect(clear_selection)
+    indicator_form.pushButton_indicator_saveas.clicked.connect(saveas_to_mongodb)
+    indicator_form.pushButton_indicator_save.clicked.connect(overwrite_in_mongodb)
 
-    # --- manage DATE SELECTION
+    # --- manage DATE SELECTION     
     def setdates():
         if parameters.ticker:
             ui.dateEdit_start.setEnabled(True)

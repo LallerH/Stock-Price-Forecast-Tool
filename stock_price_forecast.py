@@ -7,7 +7,7 @@ from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_stock_col
                   Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets,\
                   check_stock_database_in_mongodb, initial_upload_of_stock_database, write_indicator_setup,\
                   initialize_indicator_setup_database, check_indicator_setup_database, input_text, get_indicator_setups_from_mongodb,\
-                  load_indicator_setup
+                  load_indicator_setup, delete_indicator_setup
 
 if __name__ == '__main__':
 
@@ -63,20 +63,47 @@ if __name__ == '__main__':
 
     def saveas_to_mongodb():
         status, text = input_text()
-        if status == 1 and text != '':
+        list_of_indicator_setups = sorted(get_indicator_setups_from_mongodb(), key=str.casefold)
+        if status == 1 and text != '' and (text not in list_of_indicator_setups):
             setup = indicator_form.get_indicator_setup()
             setup['name'] = text
             write_indicator_setup(setup)
             list_of_indicator_setups = sorted(get_indicator_setups_from_mongodb(), key=str.casefold)
             ui.list_of_setupWidget.clear()
             ui.list_of_setupWidget.addItems(list_of_indicator_setups)
-            items = ui.list_of_setupWidget.findItems(text, Qt.MatchFlag.MatchExactly)
-            ui.list_of_setupWidget.setCurrentItem(items[0])
-        elif status == 1 and text == '':
+            item = ui.list_of_setupWidget.findItems(text, Qt.MatchFlag.MatchExactly)
+            ui.list_of_setupWidget.setCurrentItem(item[0])
+            show_message(f'{text} indicator setup has been saved!')
+        elif status == 1 and text == '' and (text not in list_of_indicator_setups):
             show_message('No SETUP NAME was given, setup was not saved!')
-
+        elif (text in list_of_indicator_setups):
+            show_message('SETUP NAME already exists, setup was not saved!')
+        
     def overwrite_in_mongodb():
-        ...
+        setup = indicator_form.get_indicator_setup()
+        selected_item = ui.list_of_setupWidget.currentItem()
+        if selected_item:
+            setup['name'] = selected_item.text()
+            
+            delete_indicator_setup(selected_item.text())
+            ui.list_of_setupWidget.takeItem(ui.list_of_setupWidget.row(selected_item))
+
+            write_indicator_setup(setup)
+            list_of_indicator_setups = sorted(get_indicator_setups_from_mongodb(), key=str.casefold)
+            ui.list_of_setupWidget.clear()
+            ui.list_of_setupWidget.addItems(list_of_indicator_setups)
+            items = ui.list_of_setupWidget.findItems(selected_item.text(), Qt.MatchFlag.MatchExactly)
+            ui.list_of_setupWidget.setCurrentItem(items[0])
+
+            show_message(f'{selected_item.text()} indicator setup has been updated!')
+        
+        else:
+            saveas_to_mongodb()
+
+    def delete_in_mongodb():
+        selected_item = ui.list_of_setupWidget.currentItem()
+        delete_indicator_setup(selected_item.text())
+        ui.list_of_setupWidget.takeItem(ui.list_of_setupWidget.row(selected_item))
 
     if check_indicator_setup_database() == False:
         initialize_indicator_setup_database()
@@ -99,6 +126,7 @@ if __name__ == '__main__':
     indicator_form.pushButton_indicator_reset.clicked.connect(clear_selection)
     indicator_form.pushButton_indicator_saveas.clicked.connect(saveas_to_mongodb)
     indicator_form.pushButton_indicator_save.clicked.connect(overwrite_in_mongodb)
+    indicator_form.pushButton_indicator_delete.clicked.connect(delete_in_mongodb)
 
     # --- manage DATE SELECTION     
     def setdates():

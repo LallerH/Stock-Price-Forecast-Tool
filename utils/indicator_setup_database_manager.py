@@ -93,6 +93,21 @@ def load_indicator_setup(setup_name: str, client = "mongodb://localhost:27017", 
     setup[0].pop('_id')
     return setup[0]
 
+def delete_indicator_setup(setup_name: str, client = "mongodb://localhost:27017", database = 'Indicator_setup'):
+    """
+    :Deletes one indicator setup in database.
+    
+    :Parameters:
+        setup_name : str
+        client : MongoDB client
+        database : MongoDB database
+    """
+
+    mongodb_client = MongoClient(client)
+    mongodb_database = mongodb_client[database]
+    mongodb_coll = mongodb_database[setup_name]    
+    mongodb_database.drop_collection(mongodb_coll)
+    
 if __name__ == "__main__":
     if check_indicator_setup_database() == False:
         initialize_indicator_setup_database()

@@ -318,6 +318,11 @@ class IndicatorSetup_Form(object):
         self.horizontalLayout_2.addWidget(self.pushButton_indicator_reset)
         self.pushButton_indicator_reset.setEnabled(False)
 
+        self.pushButton_indicator_delete = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
+        self.pushButton_indicator_delete.setText("Delete")
+        self.horizontalLayout_2.addWidget(self.pushButton_indicator_delete)
+        self.pushButton_indicator_delete.setEnabled(False)
+
         self.indicator_widgets = [
             {'checkbox' : self.checkBox_low, 'spinbox' : self.spinBox_low, 'name' : 'lowchg'},
             {'checkbox' : self.checkBox_open, 'spinbox' : self.spinBox_open, 'name' : 'openchg'},
@@ -343,6 +348,7 @@ class IndicatorSetup_Form(object):
                 self.pushButton_indicator_save.setEnabled(True)
                 self.pushButton_indicator_saveas.setEnabled(True)
                 self.pushButton_indicator_reset.setEnabled(True)
+                self.pushButton_indicator_delete.setEnabled(True)
                 one_is_checked = True
                 break
         
@@ -350,6 +356,7 @@ class IndicatorSetup_Form(object):
                 self.pushButton_indicator_save.setEnabled(False)
                 self.pushButton_indicator_saveas.setEnabled(False)
                 self.pushButton_indicator_reset.setEnabled(False)
+                self.pushButton_indicator_delete.setEnabled(False)
 
     def reset_indicator_widgets(self):
         for widget in self.indicator_widgets:

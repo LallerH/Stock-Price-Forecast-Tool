@@ -12,7 +12,7 @@ if __name__ != '__main__':
                     check_stock_data_in_mongodb,\
                     get_first_correct_date
 
-def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-01-01', last_base_date = '2024-10-18', chartwithfact=True):
+def main_engine(parameters: "Parameters", progress_bar = False, chartwithfact=True):
     # ------------- MAIN DRIVERS -------------
     
     # -- ticker --
@@ -21,46 +21,44 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
     # -> DAX: ^GDAXI
     # -> NASDAQ: ^IXIC
     # -> OTP: OTP.BD
-    ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
+    # ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
     
-    # -- last_base_date -- of last fact data; the projection will be prepared for the following day
+    # -- parameters.last_base_date -- of last fact data; the projection will be prepared for the following day
     
-    compared_period = 3
-    tolerance = 100
+    # compared_period
+    # tolerance
     # -> proposed set: period = 2-3 , tolerance = 50-100
     # -> lower period and higher tolerance more hit
     
     # --- chartwithfact
     # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
-    # -> only available if last_base_date is not the last available data (not available for projections based on last day data)
+    # -> only available if parameters.last_base_date is not the last available data (not available for projections based on last day data)
     
-    # first_base_date_index = get_first_correct_date(coll=ticker)[0]
+    # first_base_date_index = get_first_correct_date(coll=parameters.ticker)[0]
     # -> yahoo database is not perfect; no suitable data is available in database before e.g:
     # -> ^GSPC: 1982-04-20 (index: 13602) 
     # -> ^GDAXI: 1993-12-15 (index: 1491)
     # -> ^IXIC: 1984-10-12 (index: 3459)
     # ----------------------------------------      
     
-    if ticker not in ticker_name:
-        ticker_name.update({ticker: ticker})
-
-    db_exists = check_stock_data_in_mongodb(coll=ticker)
+    db_exists = check_stock_data_in_mongodb(coll=parameters.ticker)
     if db_exists[0] == False:
-        stock_df = download_from_yahoofin(ticker=ticker, period='max')
+        stock_df = download_from_yahoofin(ticker=parameters.ticker, period='max')
         stock_df = add_indicator(stock_df, indicator='all')
-        write_stock_data_to_mongodb(stock_df, coll=ticker)
+        write_stock_data_to_mongodb(stock_df, coll=parameters.ticker)
         print(f'{stock_df}\n')
     else:
-        stock_df_expasion = download_from_yahoofin(ticker=ticker, start=db_exists[1])
-        stock_df = get_stock_data_from_mongodb(coll= ticker, range='last')
+        stock_df_expasion = download_from_yahoofin(ticker=parameters.ticker, start=db_exists[1])
+        stock_df = get_stock_data_from_mongodb(coll= parameters.ticker, range='last')
         stock_df = pd.concat([stock_df, stock_df_expasion], axis=0, ignore_index=True)
         stock_df = add_indicator(stock_df, indicator='all')
-        write_stock_data_to_mongodb(stock_df, coll=ticker, replace=False)
+        write_stock_data_to_mongodb(stock_df, coll=parameters.ticker, replace=False)
 
-    stock_df = get_stock_data_from_mongodb(coll=ticker)
+    stock_df = get_stock_data_from_mongodb(coll=parameters.ticker)
     print(f'{stock_df}\n')
 
-    candles = get_candles_from_df(stock_df, date=last_base_date, period=compared_period+1)
+    compared_period = parameters.indicator_setup['days']
+    candles = get_candles_from_df(stock_df, date=parameters.last_base_date, period=compared_period+1)
     if candles == False:
         message = "CLOSED fact data for the day before projection date doesn't exist!\nPlease wait the market closure!"
         return (False, message), False, False, False, False, False
@@ -69,9 +67,10 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
     pattern = AnalyserEngine(candles, period=compared_period)
     print(f'Fingerprint:\n{pattern.fingerprint}\n')
 
-    print('Comparing data, may take several minutes!\n')
+    print(f'Comparing data, may take several minutes!\n\nParameters:\nTime horizon: {parameters.first_base_date} - {parameters.last_base_date}\n'\
+          f'Ticker: {parameters.ticker}\nIndicator setup: {parameters.indicator_setup}\n')
 
-    first_base_date = QDate.fromString(first_base_date, 'yyyy-MM-dd')
+    first_base_date = QDate.fromString(parameters.first_base_date, 'yyyy-MM-dd')
     while stock_df[stock_df['Date'] == first_base_date.toString('yyyy-MM-dd')].empty:
         first_base_date = first_base_date.addDays(1)
     else: 
@@ -97,7 +96,7 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
             candles_benchmark = get_candles_from_df(stock_df, benchmark_date, period=compared_period+1)
             pattern_benchmark = AnalyserEngine(candles_benchmark, period=compared_period)
 
-            comparison_data = pattern.generate_comparison_dict(pattern_benchmark, tolerance=tolerance)
+            comparison_data = pattern.generate_comparison_dict(pattern_benchmark, parameters.indicator_setup)
 
             result = AnalyserEngine.check_similarity(comparison_data, pattern_benchmark.indexes)
             if result[1]:
@@ -110,14 +109,14 @@ def main_engine(progress_bar = False, ticker ='^GDAXI', first_base_date = '2000-
 
     pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
     
-    if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, last_base_date):
-        last_day = stock_df['Date'][get_index_from_df(stock_df, last_base_date)+1]
-    elif chartwithfact and not stock_df.tail(1).index[0] > get_index_from_df(stock_df, last_base_date):
-        last_day = last_base_date
+    if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, parameters.last_base_date):
+        last_day = stock_df['Date'][get_index_from_df(stock_df, parameters.last_base_date)+1]
+    elif chartwithfact and not stock_df.tail(1).index[0] > get_index_from_df(stock_df, parameters.last_base_date):
+        last_day = parameters.last_base_date
         chartwithfact = False
-        print(f'Fact data for the following date of {last_base_date} is not available!\n')
+        print(f'Fact data for the following date of {parameters.last_base_date} is not available!\n')
     else:
-        last_day = last_base_date
+        last_day = parameters.last_base_date
     
     candles_for_chart = get_candles_from_df(stock_df, date=last_day, period=compared_period+1)
     median_lowchg = pattern.stats('median_Lowchg')
@@ -136,4 +135,6 @@ if __name__ == '__main__':
                                 check_stock_data_in_mongodb, get_index_from_df, get_first_correct_date
     from data_analyser_engine import AnalyserEngine
     from chart_generator import show_histogram, show_candle_chart, show_all_charts
-    main_engine()
+    from calculation_object import Parameters
+    parameters = Parameters()
+    main_engine(parameters)

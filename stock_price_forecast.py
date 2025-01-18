@@ -205,8 +205,9 @@ if __name__ == '__main__':
         else:
             last_base_date = parameters.projection_date.addDays(-1)
 
-        last_base_date = last_base_date.toString('yyyy-MM-dd')
-        first_base_date = parameters.first_base_date.toString('yyyy-MM-dd')
+        parameters.projection_date = parameters.projection_date.toString('yyyy-MM-dd')
+        parameters.last_base_date = last_base_date.toString('yyyy-MM-dd')
+        parameters.first_base_date = parameters.first_base_date.toString('yyyy-MM-dd')
 
         ui.statusbar.addWidget(ui.label_progress)
         ui.label_progress.show()
@@ -216,12 +217,12 @@ if __name__ == '__main__':
         QtWidgets.QApplication.processEvents()
 
         success, candles_for_chart, median_highchg, median_lowchg, chartwithfact, next_day_chg_dict =\
-        main_engine(ui.progress_bar, ticker=parameters.ticker, first_base_date=first_base_date, last_base_date=last_base_date, chartwithfact=True)      
+        main_engine(parameters, progress_bar=ui.progress_bar, chartwithfact=True)      
 
         if success[0]:
-            candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date.toString('yyyy-MM-dd'), projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
+            candlestick_chart = CandlestickChart(candles_for_chart, parameters.ticker, parameters.projection_date, projection={'Lowchg': median_lowchg, 'Highchg': median_highchg},
                                                 chartwithfact=chartwithfact)          
-            histogram_chart = HistogramChart(parameters.projection_date.toString('yyyy-MM-dd'), parameters.ticker, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
+            histogram_chart = HistogramChart(parameters.projection_date, parameters.ticker, Lowchg=next_day_chg_dict['Lowchg'], Highchg=next_day_chg_dict['Highchg'])
             ui.candlestick_layout.addWidget(candlestick_chart)
             candlestick_chart.show()
             ui.histogram_layout.addWidget(histogram_chart)

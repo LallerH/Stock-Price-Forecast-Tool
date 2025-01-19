@@ -181,22 +181,15 @@ class AnalyserEngine:
 
             for indicator in numeric_indicators:
                 if indicator_setup[indicator]['selected']:
-                    # bázispont
-                    # max 100 bp (+0,5%-nál +0,0 - +1,5%)
-                    # alapértelmezés 20 bp (+0,5%-nál +0,3 - +0,7%)
                     benchmark_value = benchmark.fingerprint[indicator][(benchmark.indexes[idx])]
                     self_value = self.fingerprint[indicator][value]
-                    if self_value >= 1:
-                        benchmark_min = benchmark_value - indicator_setup[indicator]['tolerance']/10000
-                        if benchmark_min < 1:
-                            benchmark_min = 1 # ez a szabály nem biztos, hogy működik mindennél
-                        benchmark_max = benchmark_value + indicator_setup[indicator]['tolerance']/10000
+                    if indicator == 'MACDhistchg':
+                        benchmark_min = benchmark_value - indicator_setup[indicator]['tolerance']
+                        benchmark_max = benchmark_value + indicator_setup[indicator]['tolerance']
                     else:
                         benchmark_min = benchmark_value - indicator_setup[indicator]['tolerance']/10000
                         benchmark_max = benchmark_value + indicator_setup[indicator]['tolerance']/10000
-                        if benchmark_max > 1:
-                            benchmark_max = 1
-
+                                      
                     if (self_value < benchmark_max) and (self_value > benchmark_min):
                         result[indicator].update({(benchmark.indexes[idx]) : True})
                     else:

@@ -107,6 +107,11 @@ def main_engine(parameters: "Parameters", progress_bar = False, chartwithfact=Tr
         message = "No hit with the chosen indicator setup!"
         return (False, message), False, False, False, False, False
 
+    print(f'Number of hits: {len(dates_of_matching_benchmark)}')
+    if len(dates_of_matching_benchmark) >767:
+        message = "Too many hits with the chosen indicator setup!"
+        return (False, message), False, False, False, False, False
+    
     pattern.set_next_day_chg(stock_df, dates_of_matching_benchmark)
     
     if chartwithfact and stock_df.tail(1).index[0] > get_index_from_df(stock_df, parameters.last_base_date):

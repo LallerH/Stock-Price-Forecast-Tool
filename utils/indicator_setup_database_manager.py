@@ -27,18 +27,18 @@ def initialize_indicator_setup_database(client = "mongodb://localhost:27017", da
     """
     setup = {
         'name' : 'Base setup',
-        'days' : 3,
-        'lowchg' : {'selected' : True, 'tolerance': 100},
-        'openchg' : {'selected' : False, 'tolerance': 100},
-        'highchg' : {'selected' : True, 'tolerance': 100},
-        'body' : {'selected' : False, 'tolerance': 100},
-        'color' : {'selected' : False, 'tolerance': False},
-        'RSIavgchg' : {'selected' : True, 'tolerance': 100},
-        'RSIstate' : {'selected' : True, 'tolerance': False},
-        'MACDhistchg' : {'selected' : False, 'tolerance': 100},
-        'MACDrange' : {'selected' : True, 'tolerance': False},
-        'SMA20chg' : {'selected' : False, 'tolerance': 100},
-        'SMA50chg' : {'selected' : False, 'tolerance': 100},
+        'days' : 2,
+        'lowchg' : {'selected' : True, 'tolerance': 80},
+        'openchg' : {'selected' : True, 'tolerance': 80},
+        'highchg' : {'selected' : True, 'tolerance': 80},
+        'body' : {'selected' : True, 'tolerance': 80},
+        'color' : {'selected' : True, 'tolerance': False},
+        'RSIavgchg' : {'selected' : False, 'tolerance': 100},
+        'RSIstate' : {'selected' : False, 'tolerance': False},
+        'MACDhistchg' : {'selected' : True, 'tolerance': 9},
+        'MACDrange' : {'selected' : False, 'tolerance': False},
+        'SMA20chg' : {'selected' : False, 'tolerance': 5},
+        'SMA50chg' : {'selected' : False, 'tolerance': 4},
         'SMA20_50relation' : {'selected' : False, 'tolerance': False}
     }
 

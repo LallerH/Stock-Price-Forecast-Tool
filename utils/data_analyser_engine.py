@@ -66,7 +66,7 @@ class AnalyserEngine:
                 'color' : {keys as of previuos, values: str -> 'green' if incr., 'red' if decr. , 'neutral' if unchg.}
             -> %change of RSIAVG data (T / T-1)
                 'RSIavgchg' : {keys, values -> as of previuos / int}
-            -> %change of MACDHIST data (T / T-1)
+            -> abs. change of MACDHIST data (T - T-1)
                 'MACDhistchg' : {keys, values -> as of previuos / int}
             -> %change of SMA20 data (T / T-1)
                 'SMA20chg' : {keys, values -> as of previuos / int}
@@ -151,7 +151,7 @@ class AnalyserEngine:
         
         :Arguments:
             benchmark: instance of AnalyserEngine class on benchmark data/date
-            tolerance: (int) percentage of tolerance range used in the search for similar historical data
+            indicator setup: dict
         
         :Returns : dict
             -> with the same keys as of self.fingerprint dict
@@ -244,11 +244,7 @@ class AnalyserEngine:
         
         :Returns: str, bool
             -> date YYYY-MM-DD / 
-            -> TRUE in case of similarity (False in else case)
-        
-        Note that this method is still in testing phase, the key indicators is needed to be identified
-        1) to get convenient similar (quality) data 
-        2) to get enough data (quantity) for the further statistical methods
+            -> TRUE in case of similarity (False in else case)       
         '''
         multiplevalue_keys = ('lowchg', 'openchg', 'highchg', 'body', 'color', 'RSIavgchg', 'MACDhistchg' ,'SMA20chg', 'SMA50chg')
         singlevalue_keys = ('RSIstate', 'MACDrange', 'SMA20_50relation')

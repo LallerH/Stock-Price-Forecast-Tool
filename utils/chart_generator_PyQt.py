@@ -149,12 +149,12 @@ class HistogramChart(QWidget):
             self.fig.set_figwidth(10)
 
             plt.subplot(2, 2, 1)
-            hist_n = plt.hist(Lowchg_data, bins=bins, color='skyblue', edgecolor='black')
+            hist_n1 = plt.hist(Lowchg_data, bins=bins, color='skyblue', edgecolor='black')
             plt.xlabel('Values')
             plt.ylabel('Frequency')
             plt.title('Low change - Distribution')
             plt.xticks(bins[::n], rotation=90, fontsize=8)
-            plt.yticks(np.arange(1,max(hist_n[0])+1,1))
+            plt.yticks(np.arange(1,max(hist_n1[0])+1,1))
 
             plt.subplot(2, 2, 3)
             box = plt.boxplot(Lowchg_data, 0, 'rs', 0, patch_artist=True)
@@ -166,12 +166,12 @@ class HistogramChart(QWidget):
             plt.xticks(bins[::n], rotation=90, fontsize=8)
 
             plt.subplot(2, 2, 2)
-            hist_n = plt.hist(Highchg_data, bins=bins, color='skyblue', edgecolor='black')
+            hist_n2 = plt.hist(Highchg_data, bins=bins, color='skyblue', edgecolor='black')
             plt.xlabel('Values')
             plt.ylabel('Frequency')
             plt.title('High change - Distribution')
             plt.xticks(bins[::n], rotation=90, fontsize=8)
-            plt.yticks(np.arange(1,max(hist_n[0])+1,1))
+            plt.yticks(np.arange(1,max(hist_n2[0])+1,1))
 
             plt.subplot(2, 2, 4)
             box = plt.boxplot(Highchg_data, 0, 'rs', 0, patch_artist=True)

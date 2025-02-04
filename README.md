@@ -1,16 +1,39 @@
-This is a portfolio project, the function of which is to search for similar patterns in historical stock price data to the recent one and with the help of it, try to make some sort of projection for the future. Whether correlation exists or not, this task is perfect to develop Python skills, using such libraries as Pandas, Pandas_ta, Matplotlib, Yfinance and MongoDB to store data. Functionality:
-- collecting data from Yahoo Finance
-- expanding DataFrame with indicators required
-- storing data
-- processing data: searching for historical patterns similar with the current one (for certain periods, for certain tolerance margins)
-- evaluating and visualizing data with histogram, box plot and candlestick chart
-- forecasting future (next day) price range with certain probability
+# 📈 Stock Price Forecasting Project
 
-See versions of Python libraries used in the project in requirements.txt.
-(pip install -r requirements.txt)
+## 🚀 **Project Overview**
+This is a portfolio project, the function of which is to search for similar patterns in historical stock price data to the recent one and with the help of it, try to make projection for the future. 
 
-Required database manager: MongoDB (mongodb://localhost:27017)
+**Key Technologies**:
+- **Python Libraries**: `Pandas`, `Pandas_ta`, `Matplotlib`, `Yfinance`, `PyQt`
+- **Database**: MongoDB
+- **Visualization**: candlestick charts, histograms, box plots
 
-Usage:
-- RUN stock_price_forecast.py
-- SET MAIN DRIVER VARIABLES IN RAW 17-38 (such as stock /ticker/, analysed date, compared period, etc.)
+
+## ⚙️ **Features**
+
+### 📥 **Data Pipeline**
+- **Automated Data Collection**: Fetch historical data from Yahoo Finance
+- **Feature Engineering**: Expand DataFrames with technical indicators
+- **Database Integration**: Store/retrieve data via MongoDB
+
+### 🔍 **Pattern Analysis**
+- **Similarity Search**: Identify historical patterns matching current trends
+  - Adjustable time windows
+  - Customizable tolerance thresholds
+- **Statistical Evaluation**: Quantify pattern significance
+
+### 📊 **Insights & Forecasting**  
+- **Visualizations**:  
+  Histograms | Box Plots | Candlestick Charts  
+- **Probabilistic Forecasts**:  
+  Next-day price range predictions
+
+
+## 🛠️ **Installation and usage**  
+1. Clone repository  
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+3. Required database manager: MongoDB (mongodb://localhost:27017)
+4. Run stock_price_forecast.py

@@ -216,17 +216,20 @@ class Ui_MainWindow(object):
         self.actionLoad_projection.setText("Load projection")
         self.actionLoad_projection.setObjectName("actionLoad_projection")
         self.menuFile.addAction(self.actionLoad_projection)
+        self.actionLoad_projection.setEnabled(False)
 
         self.actionSave_projection = QtGui.QAction(parent=MainWindow)
         self.actionSave_projection.setText("Save projection")
         self.actionSave_projection.setObjectName("actionSave_projection")
         self.menuFile.addAction(self.actionSave_projection)
+        self.actionSave_projection.setEnabled(False)
 
         self.actionSave_projection_as = QtGui.QAction(parent=MainWindow)
         self.actionSave_projection_as.setText("Save projection as ...")
         self.actionSave_projection_as.setObjectName("actionSave_projection_as")
         self.menuFile.addAction(self.actionSave_projection_as)
         self.menuFile.addSeparator()
+        self.actionSave_projection_as.setEnabled(False)
 
         self.actionExit = QtGui.QAction(parent=MainWindow)
         self.actionExit.setText("Exit")
@@ -237,13 +240,14 @@ class Ui_MainWindow(object):
         self.menuUser = QtWidgets.QMenu(parent=self.menubar)
         self.menuUser.setTitle("User")
         self.menuUser.setObjectName("menuUser")
+        self.menuUser.setEnabled(False)
 
         self.actionUser_details = QtGui.QAction(parent=MainWindow)
         self.actionUser_details.setText("User details")
         self.actionUser_details.setObjectName("actionUser_details")
         self.menuUser.addAction(self.actionUser_details)
         self.menuUser.addSeparator()
-        
+
         self.actionLogout = QtGui.QAction(parent=MainWindow)
         self.actionLogout.setText("Logout")
         self.actionLogout.setObjectName("actionLogout")
@@ -258,7 +262,8 @@ class Ui_MainWindow(object):
         self.actionAvailable_data.setText("Available stock data")
         self.actionAvailable_data.setObjectName("actionAvailable_data")
         self.menuDatabase.addAction(self.actionAvailable_data)
-        
+        self.actionAvailable_data.setEnabled(False)
+
         self.actionDownload_new_stock = QtGui.QAction(parent=MainWindow)
         self.actionDownload_new_stock.setText("Download new stock")
         self.actionDownload_new_stock.setObjectName("actionDownload_new_stock")
@@ -268,36 +273,38 @@ class Ui_MainWindow(object):
         self.actionUpdate_stock_data.setText("Update stock data")
         self.actionUpdate_stock_data.setObjectName("actionUpdate_stock_data")
         self.menuDatabase.addAction(self.actionUpdate_stock_data)
+        self.actionUpdate_stock_data.setEnabled(False)
 
         # --- Setup indicators menu
-        self.menuSetup_indicators = QtWidgets.QMenu(parent=self.menubar)
-        self.menuSetup_indicators.setTitle("Setup indicators")
-        self.menuSetup_indicators.setObjectName("menuSetup_indicators")
+        # self.menuSetup_indicators = QtWidgets.QMenu(parent=self.menubar)
+        # self.menuSetup_indicators.setTitle("Setup indicators")
+        # self.menuSetup_indicators.setObjectName("menuSetup_indicators")
 
-        self.actionLoad_setup = QtGui.QAction(parent=MainWindow)
-        self.actionLoad_setup.setText("Load setup")
-        self.actionLoad_setup.setObjectName("actionLoad_setup")
-        self.menuSetup_indicators.addAction(self.actionLoad_setup)
+        # self.actionLoad_setup = QtGui.QAction(parent=MainWindow)
+        # self.actionLoad_setup.setText("Load setup")
+        # self.actionLoad_setup.setObjectName("actionLoad_setup")
+        # self.menuSetup_indicators.addAction(self.actionLoad_setup)
 
-        self.actionSave_setup = QtGui.QAction(parent=MainWindow)
-        self.actionSave_setup.setText("Save setup")
-        self.actionSave_setup.setObjectName("actionSave_setup")
-        self.menuSetup_indicators.addAction(self.actionSave_setup)
+        # self.actionSave_setup = QtGui.QAction(parent=MainWindow)
+        # self.actionSave_setup.setText("Save setup")
+        # self.actionSave_setup.setObjectName("actionSave_setup")
+        # self.menuSetup_indicators.addAction(self.actionSave_setup)
 
-        self.actionSave_setup_as = QtGui.QAction(parent=MainWindow)
-        self.actionSave_setup_as.setText("Save setup as ...")
-        self.actionSave_setup_as.setObjectName("actionSave_setup_as")
-        self.menuSetup_indicators.addAction(self.actionSave_setup_as)
+        # self.actionSave_setup_as = QtGui.QAction(parent=MainWindow)
+        # self.actionSave_setup_as.setText("Save setup as ...")
+        # self.actionSave_setup_as.setObjectName("actionSave_setup_as")
+        # self.menuSetup_indicators.addAction(self.actionSave_setup_as)
 
-        self.actionNew_setup = QtGui.QAction(parent=MainWindow)
-        self.actionNew_setup.setText("New setup")
-        self.actionNew_setup.setObjectName("actionNew_setup")
-        self.menuSetup_indicators.addAction(self.actionNew_setup)
+        # self.actionNew_setup = QtGui.QAction(parent=MainWindow)
+        # self.actionNew_setup.setText("New setup")
+        # self.actionNew_setup.setObjectName("actionNew_setup")
+        # self.menuSetup_indicators.addAction(self.actionNew_setup)
 
         # --- Help menu
         self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
         self.menuHelp.setTitle("Help")
         self.menuHelp.setObjectName("menuHelp")
+        self.menuHelp.setEnabled(False)
 
         self.actionIndicators = QtGui.QAction(parent=MainWindow)
         self.actionIndicators.setText("Indicators")
@@ -338,7 +345,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuUser.menuAction())
         self.menubar.addAction(self.menuDatabase.menuAction())
-        self.menubar.addAction(self.menuSetup_indicators.menuAction())
+        # self.menubar.addAction(self.menuSetup_indicators.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         # TabWidgets on WORKPLACE
@@ -408,6 +415,36 @@ def input_text():
     dialog = QtWidgets.QInputDialog()
     dialog.setWindowTitle('Save')
     dialog.setLabelText('Input setup name:')    
+    dialog.setWindowIcon(QIcon('ikon.ico'))
+    dialog.setStyleSheet("""
+        QLineEdit {
+            border: 1px solid grey;
+            border-radius: 1px;
+            padding: 2px;
+        }
+        QDialogButtonBox QPushButton {
+            background-color: rgb(76, 172, 207);
+            border: 1px solid #4c7a9b;
+            border-radius: 5px;
+            padding: 5px;
+            min-width: 75px;
+            height: 10px;
+            color: black;
+        }
+        QDialogButtonBox QPushButton:hover {
+            background-color: rgb(56, 152, 187);
+            color: black;
+        }
+    """)
+    ok = dialog.exec()
+    if ok:
+        return ok, dialog.textValue()
+    return ok, False
+
+def input_text_stock():
+    dialog = QtWidgets.QInputDialog()
+    dialog.setWindowTitle('New stock')
+    dialog.setLabelText('Input ticker name:')    
     dialog.setWindowIcon(QIcon('ikon.ico'))
     dialog.setStyleSheet("""
         QLineEdit {

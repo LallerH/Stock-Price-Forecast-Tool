@@ -1,13 +1,11 @@
 import sys
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QDate, Qt
-from PyQt6.QtWidgets import QMessageBox
-from PyQt6.QtGui import QIcon
 from utils import Ui_MainWindow, IndicatorSetup_Form, main_engine, get_stock_collections_from_mongodb,\
                   Parameters, get_first_correct_date, CandlestickChart, HistogramChart, show_message, hide_widgets,\
                   check_stock_database_in_mongodb, initial_upload_of_stock_database, write_indicator_setup,\
                   initialize_indicator_setup_database, check_indicator_setup_database, input_text, get_indicator_setups_from_mongodb,\
-                  load_indicator_setup, delete_indicator_setup
+                  load_indicator_setup, delete_indicator_setup, input_text_stock, download_new_stock_data
 
 if __name__ == '__main__':
 
@@ -29,7 +27,7 @@ if __name__ == '__main__':
         print('Downloading...')
         try:
             initial_upload_of_stock_database(database = 'Stock_data')
-            show_message('Initial setup of database succeded!\nInitial download of S&P, DAX and NASDAQ indexes succeeded!')
+            show_message('Initial setup of database succeded!\nInitial download of stock data (S&P and DAX index, Alphabet) succeeded!')
         except:
             show_message('Initial setup of database was not succeeded!\nRequired:\n- database manager MongoDB (mongodb://localhost:27017)\n- internet connection')
             sys.exit(app.exec())
@@ -209,6 +207,8 @@ if __name__ == '__main__':
         parameters.last_base_date = last_base_date.toString('yyyy-MM-dd')
         parameters.first_base_date = parameters.first_base_date.toString('yyyy-MM-dd')
 
+        parameters.indicator_setup = indicator_form.get_indicator_setup()
+        
         ui.statusbar.addWidget(ui.label_progress)
         ui.label_progress.show()
         ui.statusbar.addWidget(ui.progress_bar)
@@ -236,6 +236,31 @@ if __name__ == '__main__':
             ui.label_progress.hide()
 
     ui.pushButton.clicked.connect(start_main_engine)
+
+    # --- manage MENU
+    # --- download new stock data
+
+    def stock_download_manager():
+        list_of_tickers = sorted(get_stock_collections_from_mongodb(), key=str.casefold)
+        status, ticker = input_text_stock()
+        if status == 1 and ticker != '' and (ticker not in list_of_tickers):
+            download_new_stock_data(ticker)
+            show_message(f'Stock data of {ticker} was succesfully downloaded!')
+            list_of_tickers = sorted(get_stock_collections_from_mongodb(), key=str.casefold)
+            ui.list_of_tickersWidget.itemSelectionChanged.disconnect()
+            ui.list_of_tickersWidget.clear()
+            ui.list_of_tickersWidget.addItems(list_of_tickers)
+            ui.list_of_tickersWidget.itemSelectionChanged.connect(on_ticker_selection_changed)
+        
+        elif status == 1 and ticker == '':
+            show_message('No TICKER NAME was given, ticker was not downloaded!')
+        
+        elif ticker in list_of_tickers:
+            show_message('TICKER already exists in database!')
+
+    # --- exit
+    ui.actionExit.triggered.connect(lambda: sys.exit(app.exec)) 
+    ui.actionDownload_new_stock.triggered.connect(stock_download_manager)
 
     MainWindow.show()
     sys.exit(app.exec())

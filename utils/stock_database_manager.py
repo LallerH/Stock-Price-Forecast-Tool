@@ -21,7 +21,7 @@ def check_stock_database_in_mongodb(client = "mongodb://localhost:27017", databa
 def initial_upload_of_stock_database(client = "mongodb://localhost:27017", database = 'Stock_data'):
     from .data_downloader import download_from_yahoofin, add_indicator
     """
-    :Creates Stock_data database and uploads ^GSPC, ^GDAXI, ^IXIC data
+    :Creates Stock_data database and uploads ^GSPC, ^GDAXI, GOOGL data
     
     :Parameters:
         client : MongoDB client
@@ -30,11 +30,21 @@ def initial_upload_of_stock_database(client = "mongodb://localhost:27017", datab
     mongodb_client = MongoClient(f'{client}')
     database = mongodb_client[database]
     
-    tickers = ('^GSPC','^GDAXI','^IXIC')
+    tickers = ('^GSPC','^GDAXI','GOOGL')
     for item in tickers:
         stock_df = download_from_yahoofin(ticker=item, period='max')
         stock_df = add_indicator(stock_df, indicator='all')
         write_stock_data_to_mongodb(stock_df, coll=item)
+
+def download_new_stock_data(ticker, client = "mongodb://localhost:27017", database = 'Stock_data'):
+    from .data_downloader import download_from_yahoofin, add_indicator
+    
+    mongodb_client = MongoClient(f'{client}')
+    database = mongodb_client[database]
+    
+    stock_df = download_from_yahoofin(ticker=ticker, period='max')
+    stock_df = add_indicator(stock_df, indicator='all')
+    write_stock_data_to_mongodb(stock_df, coll=ticker)
 
 def check_stock_data_in_mongodb(client = "mongodb://localhost:27017", database = 'Stock_data', coll = '^GSPC') -> bool:
     """

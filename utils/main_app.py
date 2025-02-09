@@ -13,33 +13,23 @@ if __name__ != '__main__':
                     get_first_correct_date
 
 def main_engine(parameters: "Parameters", progress_bar = False, chartwithfact=True):
-    # ------------- MAIN DRIVERS -------------
-    
-    # -- ticker --
-    # -> see ticker names on Yahoo Finance; tickers e.g.:
-    # -> S&P500: ^GSPC
-    # -> DAX: ^GDAXI
-    # -> NASDAQ: ^IXIC
-    # -> OTP: OTP.BD
-    # ticker_name = {'^GSPC': 'S&P 500', '^GDAXI': 'DAX', 'OTP.BD': 'OTP', '^IXIC': 'NASDAQ'}
-    
-    # -- parameters.last_base_date -- of last fact data; the projection will be prepared for the following day
-    
-    # compared_period
-    # tolerance
-    # -> proposed set: period = 2-3 , tolerance = 50-100
-    # -> lower period and higher tolerance more hit
-    
-    # --- chartwithfact
-    # -> puts fact data on japanese candle chart in case of projection for historical data (testing the model)
-    # -> only available if parameters.last_base_date is not the last available data (not available for projections based on last day data)
-    
-    # first_base_date_index = get_first_correct_date(coll=parameters.ticker)[0]
-    # -> yahoo database is not perfect; no suitable data is available in database before e.g:
-    # -> ^GSPC: 1982-04-20 (index: 13602) 
-    # -> ^GDAXI: 1993-12-15 (index: 1491)
-    # -> ^IXIC: 1984-10-12 (index: 3459)
-    # ----------------------------------------      
+    '''
+    Main engine of the application. It updates stock data from Yahoo Finance,
+    manages the comparison and returns the next day change of the stock price.
+
+    Parameters:
+        parameters: Parameters object (ticker, indicator_setup, first_base_date, last_base_date, projection_date)
+        progress_bar: QProgressBar object
+        chartwithfact: bool (True if the chart should be generated with the fact data)
+
+    Returns:
+        success: tuple (returns False and a message if the comparison failed)
+        candles_for_chart: pd.DataFrame (provided by get_data_from_mongodb or data_downloader module /with all indicators/)
+        median_highchg: float (median of the highchg values of the matching benchmark)
+        median_lowchg: float (median of the lowchg values of the matching benchmark)
+        chartwithfact: bool
+        next_day_chg_dict: dict {'Lowchg': list, 'Highchg': list} / next day change of the stock low and high price
+    '''
     
     db_exists = check_stock_data_in_mongodb(coll=parameters.ticker)
     if db_exists[0] == False:
